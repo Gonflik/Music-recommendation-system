@@ -22,3 +22,6 @@ class Rating(Base):
                 name="ck_rating_score_range",
             ),
         )
+    user: Mapped["User"] = relationship(back_populates="ratings")
+    song: Mapped["Song"] = relationship(back_populates="ratings")
+    album: Mapped["Album"] = relationship(back_populates="ratings")

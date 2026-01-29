@@ -8,7 +8,7 @@ class Playlist(Base):
     __tablename__ = "playlist"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(100))
+    name: Mapped[str] = mapped_column(String(120))
     description: Mapped[str] = mapped_column(String(200))
     #genre?? кабута шляпа
     
