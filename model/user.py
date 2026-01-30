@@ -18,7 +18,7 @@ class User(Base):
         nullable=False,
         default=UserRole.USER,
     )
-    encrypted_password: Mapped[str] #тре подивитись як то делать #also chatgipiti says hashed better
+    password: Mapped[str] #тре подивитись як то делать #also chatgipiti says hashed better
     age: Mapped[int]
     gender: Mapped[str | None] = mapped_column(String(30))
     location: Mapped[str | None] = mapped_column(String(100))
