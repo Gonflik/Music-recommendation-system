@@ -12,7 +12,9 @@ class Song(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(50))
     length: Mapped[int]
-    avg_rating = column_property(select(func.avg(Rating.score).where(Rating.song_id == id)).correlate_except(Rating).scalar_subquery())
+    avg_rating = column_property(
+        select(func.avg(Rating.score)).where(Rating.song_id == id).correlate_except(Rating).scalar_subquery()
+    )
     genre: Mapped[str] #має бути аутодетект хзхз
 
     artist_id: Mapped[int] = mapped_column(ForeignKey("artist.id"))

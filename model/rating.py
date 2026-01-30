@@ -10,8 +10,9 @@ class Rating(Base):
     score: Mapped[int] 
     description: Mapped[Optional[str]] = mapped_column(Text)
 
-    album_id: Mapped[int] = mapped_column(ForeignKey="album.id")
-    song_id: Mapped[int] = mapped_column(ForeignKey="song.id")
+    album_id: Mapped[int] = mapped_column(ForeignKey("album.id"))
+    song_id: Mapped[int] = mapped_column(ForeignKey("song.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
     album: Mapped["Album"] = relationship(back_populates="ratings")
     song: Mapped["Song"] = relationship(back_populates="ratings")

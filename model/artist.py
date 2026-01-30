@@ -14,8 +14,8 @@ class Artist(Base):
     gender: Mapped[Optional[str]]
     location: Mapped[str]
 
-    albums: Mapped[List["Albums"]] = relationship(back_populates="artist")
-    songs: Mapped[List["Songs"]] = relationship(
+    albums: Mapped[List["Album"]] = relationship(back_populates="artist")
+    songs: Mapped[List["Song"]] = relationship(
         secondary=artist_song_association,
         back_populates="artist",
         )
