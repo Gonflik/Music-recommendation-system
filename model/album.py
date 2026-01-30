@@ -15,7 +15,7 @@ class Album(Base):
         select(func.sum(Song.length)).where(Song.album_id == id).correlate_except(Song).scalar_subquery()
     )
     avg_rating = column_property(select(func.avg(Rating.score).where(Rating.song_id == id)).correlate_except(Rating).scalar_subquery())
-
+    
     artist_id: Mapped[int] = mapped_column(ForeignKey("artist.id"))
 
     artist: Mapped["Artist"] = relationship(back_populates="albums")
