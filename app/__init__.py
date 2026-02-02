@@ -1,4 +1,3 @@
-import os
 from flask import Flask
 from flask_sqlalchemy_lite import SQLAlchemy
 from model.base import Base
