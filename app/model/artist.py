@@ -12,7 +12,7 @@ class Artist(Base):
     description: Mapped[Optional[str]] = mapped_column(String(1200))
     age: Mapped[Optional[int]]
     gender: Mapped[Optional[str]]
-    location: Mapped[str]
+    location: Mapped[Optional[str]]
 
     albums: Mapped[List["Album"]] = relationship(back_populates="artist")
     songs: Mapped[List["Song"]] = relationship(
