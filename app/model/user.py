@@ -7,9 +7,15 @@ from typing import List, Optional
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db
 
-class UserRole(enum.Enum):
+class UserRole(str, enum.Enum):
     ADMIN = "admin"
     USER = "user"
+
+class GenderEnum(str, enum.Enum):
+    MALE = "male"
+    FEMALE = "female"
+    NON_BINARY = "non_binary"
+    PREFER_NOT_TO_SAY = "prefer_not_to_say"
 
 class User(Base):
     __tablename__ = "user"
@@ -24,7 +30,11 @@ class User(Base):
     )
     password: Mapped[str] 
     age: Mapped[int]
-    gender: Mapped[str | None] = mapped_column(String(30))
+    gender: Mapped[GenderEnum] = mapped_column(
+        Enum(GenderEnum, name="user_gender_enum"),
+        nullable=False,
+        default=GenderEnum.PREFER_NOT_TO_SAY,
+    )
     location: Mapped[str | None] = mapped_column(String(100))
 
     ratings: Mapped[List["Rating"]] = relationship(back_populates="user")
@@ -33,8 +43,8 @@ class User(Base):
     __table_args__ = (
         CheckConstraint("LENGTH(name) > 2 ", name="ck_name_length"),
         CheckConstraint("email LIKE '%_@__%.__%'", name="ck_email_form"),
-        CheckConstraint("LENGTH(password) > 8", name="ck_password_length"),
-        CheckConstraint("age BETWEEN 6 AND 119", name="ck_age_range")
+        CheckConstraint("age BETWEEN 6 AND 119", name="ck_age_range"),
+        CheckConstraint("LENGTH(location) > 2", name="ck_location_length")
     )
 
     @validates('email')
@@ -54,15 +64,23 @@ class User(Base):
         if age < 5 or age > 120:
             raise ValueError("Invalid age!")
         return age
+    
+    @validates('location')
+    def validate_location(self, key, location):
+        if location is not None:
+            if len(location) < 2:
+                raise ValueError("Name of location(country) is too short!(min 2 chars)")
+        return location
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
     
+    #tre static method abo class method?
     def get_user_by_email(email):
         stmt = select(User).where(User.email==email)
         user = db.session.scalar(stmt)
         return user
-
+    #tre static method abo class method?
     def get_user_by_id(id):
         stmt = select(User).where(User.id==id)
         user = db.session.scalar(stmt)
