@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from werkzeug.security import generate_password_hash
 from app.model import User
+from app.model.user import GenderEnum
 from app.extensions import db
 from sqlalchemy import select
 
@@ -26,7 +27,9 @@ def user_register():
         name = data.get('name'),
         email = data.get('email'),
         age = data.get('age'),
-        password = hashed_pass
+        password = hashed_pass,
+        gender = GenderEnum(data.get('gender', 'prefer_not_to_say').lower()),
+        location = data.get('location')
     )
     
     
@@ -54,7 +57,9 @@ def user_profile(id):
         "email" : user.email,
         "id" : user.id,
         "name" : user.name,
-        "age" : user.age
+        "age" : user.age,
+        "gender": user.gender,
+        "location": user.location
     }})
 
 @user_bp.patch('/profile/<int:id>')
@@ -66,7 +71,7 @@ def user_update_patch(id):
     
     new_name = data.get('name')
     new_age = data.get('age')
-    new_gender = data.get('gender')
+    new_gender = data.get('gender').lower()
     new_location = data.get('location')
 
     if new_name:
@@ -76,7 +81,7 @@ def user_update_patch(id):
         user.age = new_age
 
     if new_gender:
-        user.gender = new_gender
+        user.gender = GenderEnum(new_gender)
     
     if new_location:
         user.location = new_location
@@ -106,7 +111,7 @@ def user_update_put(id):
     
     user.age = data.get('age')
     user.name = data.get('name')
-    user.gender = data.get('gender')
+    user.gender = GenderEnum(data.get('gender').lower())
     user.location = data.get('location')
 
     user.save()
