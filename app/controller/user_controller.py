@@ -111,7 +111,7 @@ def user_update_put(id):
     
     user.age = data.get('age')
     user.name = data.get('name')
-    user.gender = GenderEnum(data.get('gender').lower())
+    user.gender = GenderEnum(data.get('gender', 'prefer_not_to_say').lower())
     user.location = data.get('location')
 
     user.save()
@@ -134,6 +134,9 @@ def user_delete(id):
     if not user:
         return jsonify({"message" : "User not found!"}), 404
     
+    if not data.get('password'):
+        return jsonify({"message": "Password required!"}), 400
+
     if user.check_password(data.get('password')):
         user.delete()
         return jsonify({"message" : "User deleted successfully!"}), 200
