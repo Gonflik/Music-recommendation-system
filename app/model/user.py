@@ -38,7 +38,7 @@ class User(Base):
     location: Mapped[str | None] = mapped_column(String(100))
 
     ratings: Mapped[List["Rating"]] = relationship(back_populates="user")
-    tolisten: Mapped["ToListen"] = relationship(back_populates="user")
+    tolisten: Mapped[List["ToListen"]] = relationship(back_populates="user")
 
     __table_args__ = (
         CheckConstraint("LENGTH(name) > 2 ", name="ck_name_length"),
@@ -61,7 +61,7 @@ class User(Base):
         
     @validates('age')
     def validate_age(self, key, age):
-        if age < 5 or age > 120:
+        if age < 6 or age > 120:
             raise ValueError("Invalid age!")
         return age
     
