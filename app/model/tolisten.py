@@ -21,11 +21,24 @@ class ToListen(Base):
     )
 
     @classmethod
-    def get_album_join_tolisten_join_artist_by_user_id(cls,user_id): 
+    def get_all_tolisten_join_album_join_artist_by_user_id(cls,user_id): 
         stmt = select(cls).where(cls.user_id== user_id).options(joinedload(cls.album).joinedload(Album.artist))
         result = db.session.scalars(stmt).all()
         return result
     
+    @classmethod
+    def get_one_tolisten_by_user_album_id(cls, album_id, user_id):
+        stmt = select(cls).where(cls.user_id==user_id, cls.album_id==album_id)
+        result = db.session.scalar(stmt)
+        return result
+    
+    @classmethod
+    def get_one_tolisten_by_id(cls, tolisten_id):
+        stmt = select(cls).where(cls.id==tolisten_id)
+        result = db.session.scalar(stmt)
+        return result
+    
+    #you need to pass user_id before when creating a ToListen, so it works fine
     @validates('album_id')
     def validate_album_id(self, key, album_id):
         stmt = select(ToListen).where(
