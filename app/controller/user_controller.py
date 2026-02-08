@@ -11,6 +11,8 @@ user_bp = Blueprint('user',__name__)
 @user_bp.post('/register')
 def user_register():
     data = request.get_json()
+    if not data.get('email'):
+        return jsonify({"message": "Email required!"}), 400
 
     user = User.get_user_by_email(data.get('email'))
     if user is not None:
