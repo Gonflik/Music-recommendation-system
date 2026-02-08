@@ -1,9 +1,10 @@
 from .base import Base
 from .song import Song
 from .rating import Rating
-from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
-from sqlalchemy import String, ForeignKey, func, select
-from typing import List, Optional
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates
+from sqlalchemy import String, ForeignKey, func, select, CheckConstraint
+from typing import List
+from app import db
 
 class Album(Base):
     __tablename__ = "album"
@@ -23,3 +24,26 @@ class Album(Base):
     songs: Mapped[List["Song"]] = relationship(back_populates="album")
     ratings: Mapped[List["Rating"]] = relationship(back_populates="album")
     tolisten: Mapped[List["ToListen"]] = relationship(back_populates="album")
+
+    __table_args__ = (
+        CheckConstraint("LENGTH(name) > 0", name="ck_album_name_length"),
+    )
+
+    @validates('name')
+    def validate_name(self, key, name):
+        if len(name) < 1:
+            raise ValueError("Album name cant be empty(min 1 char)")
+        return name
+    
+    @classmethod
+    def get_album_by_id(cls, album_id):
+        stmt = select(cls).where(cls.id==album_id)
+        album = db.session.scalar(stmt)
+        return album
+    
+    @classmethod
+    def get_album_by_name(cls, name):
+        stmt = select(cls).where(cls.name.ilike(name))
+        album = db.session.scalar(stmt)
+        return album
+    
