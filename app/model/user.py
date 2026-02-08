@@ -41,10 +41,10 @@ class User(Base):
     tolisten: Mapped[List["ToListen"]] = relationship(back_populates="user")
 
     __table_args__ = (
-        CheckConstraint("LENGTH(name) > 2 ", name="ck_name_length"),
-        CheckConstraint("email LIKE '%_@__%.__%'", name="ck_email_form"),
-        CheckConstraint("age BETWEEN 6 AND 119", name="ck_age_range"),
-        CheckConstraint("LENGTH(location) > 2", name="ck_location_length")
+        CheckConstraint("LENGTH(name) > 2 ", name="ck_user_name_length"),
+        CheckConstraint("email LIKE '%_@__%.__%'", name="ck_user_email_form"),
+        CheckConstraint("age BETWEEN 6 AND 119", name="ck_user_age_range"),
+        CheckConstraint("LENGTH(location) > 2", name="ck_user_location_length")
     )
 
     @validates('email')
@@ -56,7 +56,7 @@ class User(Base):
     @validates('name')
     def validate_name(self, key, name):
         if len(name) < 2:
-            raise ValueError("Password too short(min 2 chars)")
+            raise ValueError("Name too short(min 2 chars)")
         return name
         
     @validates('age')
