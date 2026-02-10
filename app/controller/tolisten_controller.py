@@ -81,4 +81,24 @@ def tolisten_delete_album(user_id):
         return jsonify({"message": "ToListen entry deleted successfully!"}), 200
     return jsonify({"message": "No ToListen entry with such id!"}), 404
     
+
+@tolisten_bp.put('/tolisten/<int:user_id>')
+def tolisten_update_note(user_id):
+    data = request.get_json()
+
+    user = User.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"message" : "User not found!"}), 404
     
+    tolisten_entry_id = data.get('tolisten_id')
+    if not tolisten_entry_id:
+        return jsonify({"message": "Missing required field!(tolisten_id"}), 400
+    
+    entry = ToListen.get_one_tolisten_by_id(tolisten_entry_id)
+    if entry:
+        if entry.user_id != user_id:
+            return jsonify({"message": "Unauthorized! This is not your entry"}), 403
+        entry.note = data.get('note')
+        entry.save()
+        return jsonify({"message": "Note updated successfully!"}), 200
+    return jsonify({"message": "No ToListen entry with such id!"}), 404
