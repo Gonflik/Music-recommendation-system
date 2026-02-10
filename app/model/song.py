@@ -2,8 +2,8 @@ from .base import Base
 from .rating import Rating #!!!
 from .associations.playlist_song_association import playlist_song_association
 from .associations.artist_song_association import artist_song_association
-from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
-from sqlalchemy import String, ForeignKey, func, select
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates
+from sqlalchemy import String, ForeignKey, func, select, CheckConstraint
 from typing import List, Optional
 
 class Song(Base):
@@ -30,3 +30,14 @@ class Song(Base):
         back_populates="songs",
     )
     ratings: Mapped[List["Rating"]] = relationship(back_populates="song")
+
+    __table_args__ = (
+        CheckConstraint("LENGTH(name) > 0", name="ck_name_length"),
+    )
+
+    @validates('name')
+    def validate_name(self, key, name):
+        if len(name) < 1:
+            raise ValueError("Name too short(min 1 char)")
+        return name
+    

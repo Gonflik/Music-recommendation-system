@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
+from sqlalchemy import String, CheckConstraint
 from typing import List, Optional
 from .base import Base
 from .associations.artist_song_association import artist_song_association
@@ -19,3 +19,13 @@ class Artist(Base):
         secondary=artist_song_association,
         back_populates="artist",
         )
+    
+    __table_args__ = (
+        CheckConstraint("LENGTH(name) > 0", name="ck_artist_name_length"),
+    )
+
+    @validates('name')
+    def validate_name(self, key, name):
+        if len(name) < 1:
+            raise ValueError("Name too short(min 1 char)")
+        return name
