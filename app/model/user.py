@@ -55,8 +55,9 @@ class User(Base):
     
     @validates('name')
     def validate_name(self, key, name):
-        if len(name) < 2:
-            raise ValueError("Name too short(min 2 chars)")
+        if name is not None:
+            if len(name) < 2:
+                raise ValueError("Name too short(min 2 chars)")
         return name
         
     @validates('age')
