@@ -2,8 +2,6 @@ from flask import Blueprint, jsonify, request
 from werkzeug.security import generate_password_hash
 from app.model import User
 from app.model.user import GenderEnum
-from app.extensions import db
-from sqlalchemy import select
 
 
 user_bp = Blueprint('user',__name__)
