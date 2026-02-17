@@ -5,6 +5,7 @@ from .associations.artist_song_association import artist_song_association
 from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates
 from sqlalchemy import String, ForeignKey, func, select, CheckConstraint
 from typing import List, Optional
+from app import db
 
 class Song(Base):
     __tablename__ = "song"
@@ -17,7 +18,6 @@ class Song(Base):
     )
     genre: Mapped[str] #має бути аутодетект хзхз
 
-    artist_id: Mapped[int] = mapped_column(ForeignKey("artist.id"))
     album_id: Mapped[int] = mapped_column(ForeignKey("album.id"))
 
     artist: Mapped[List["Artist"]] = relationship(
@@ -41,3 +41,14 @@ class Song(Base):
             raise ValueError("Name too short(min 1 char)")
         return name
     
+    @validates('artist')
+    def validate_artist(self, key, artists):
+        if not artists:
+            raise ValueError("A song must have at least one artist!")
+        return artists
+    
+    @classmethod
+    def get_song_by_id(cls, song_id):
+        stmt = select(cls).where(cls.id==song_id)
+        song = db.session.scalar(stmt)
+        return song
