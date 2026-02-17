@@ -19,17 +19,11 @@ class ToListen(Base):
     __table_args__ = (
         UniqueConstraint('user_id', 'album_id', name="uq_tolisten_albumid_userid"),
     )
-
+    #can be optimized, load_only() for artist,album
     @classmethod
     def get_all_tolisten_join_album_join_artist_by_user_id(cls,user_id): 
         stmt = select(cls).where(cls.user_id== user_id).options(joinedload(cls.album).joinedload(Album.artist))
         result = db.session.scalars(stmt).all()
-        return result
-    
-    @classmethod
-    def get_one_tolisten_by_user_album_id(cls, album_id, user_id):
-        stmt = select(cls).where(cls.user_id==user_id, cls.album_id==album_id)
-        result = db.session.scalar(stmt)
         return result
     
     @classmethod
