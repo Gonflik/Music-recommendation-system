@@ -2,7 +2,7 @@ from .base import Base
 from .rating import Rating #!!!
 from .associations.playlist_song_association import playlist_song_association
 from .associations.artist_song_association import artist_song_association
-from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload
 from sqlalchemy import String, ForeignKey, func, select, CheckConstraint
 from typing import List, Optional
 from app import db
@@ -52,3 +52,17 @@ class Song(Base):
         stmt = select(cls).where(cls.id==song_id)
         song = db.session.scalar(stmt)
         return song
+
+    @classmethod
+    def search_for_song_by_query(cls, query):
+        stmt = select(cls).options(joinedload(cls.artist)).where(cls.name.ilike(f"%{query}%")).limit(10)
+        result = db.session.scalars(stmt).unique().all()
+        return result
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "length": self.length,
+            "artist_name": self.artist[0].name,
+        }

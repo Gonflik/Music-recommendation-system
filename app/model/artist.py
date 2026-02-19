@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
-from sqlalchemy import String, CheckConstraint
+from sqlalchemy import String, CheckConstraint, select
 from typing import List, Optional
 from .base import Base
 from .associations.artist_song_association import artist_song_association
+from app import db
 
 class Artist(Base):
     __tablename__ = "artist"
@@ -29,3 +30,15 @@ class Artist(Base):
         if len(name) < 1:
             raise ValueError("Name too short(min 1 char)")
         return name
+    
+    @classmethod
+    def search_for_artist_by_query(cls, query):
+        stmt = select(cls).where(cls.name.ilike(f"%{query}%")).limit(10)
+        result = db.session.scalars(stmt).all()
+        return result
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+        }

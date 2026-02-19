@@ -1,7 +1,7 @@
 from .base import Base
 from .song import Song
 from .rating import Rating
-from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload
 from sqlalchemy import String, ForeignKey, func, select, CheckConstraint
 from typing import List
 from app import db
@@ -47,3 +47,16 @@ class Album(Base):
         album = db.session.scalar(stmt)
         return album
     
+    @classmethod
+    def search_for_album_by_query(cls, query):
+        stmt = select(cls).options(joinedload(cls.artist)).where(cls.name.ilike(f"%{query}%")).limit(10)
+        result = db.session.scalars(stmt).all()
+        return result
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "length": self.length,
+            "artist_name": self.artist.name,
+        }
