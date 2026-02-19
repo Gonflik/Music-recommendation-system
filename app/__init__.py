@@ -4,6 +4,7 @@ from .model.base import Base
 from .controller.user_controller import user_bp
 from .controller.tolisten_controller import tolisten_bp
 from .controller.rating_controller import rating_bp
+from .controller.search_engine import search_bp
 
 
 
@@ -16,6 +17,7 @@ def create_app():
     app.register_blueprint(user_bp, url_prefix='/user')
     app.register_blueprint(tolisten_bp, url_prefix='/user')
     app.register_blueprint(rating_bp, url_prefix='/user')
+    app.register_blueprint(search_bp, url_prefix='/user')
 
     with app.app_context():
         Base.metadata.create_all(db.engine)
