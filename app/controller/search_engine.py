@@ -22,5 +22,5 @@ def search():
         if items:
             final_result[key] = [item.to_dict() for item in items]
 
-    return final_result
+    return jsonify(final_result)
 
