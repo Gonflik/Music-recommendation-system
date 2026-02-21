@@ -15,7 +15,6 @@ def test_user_name_len_constraint(db_session):
     with pytest.raises(ValueError):
         user = UserFactory(name='A')
 
-#na rivni pitona name=None prohodit, ale v bd no
 def test_user_name_none(db_session):
     with pytest.raises(IntegrityError):
         user = UserFactory(name=None)
