@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 def test_create_user(db_session):
     user = UserFactory()
+    db_session.flush()
     assert user is not None
 
 def test_user_age_constraint(db_session):
