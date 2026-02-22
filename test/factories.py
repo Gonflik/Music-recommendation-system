@@ -34,23 +34,8 @@ class SongFactory(factory.alchemy.SQLAlchemyModelFactory):
     length = factory.Faker("random_int", min=40, max=360)
     genre = factory.Faker("random_element", elements=["Rock", "Techno", "Metal", "Jazz", "Lo-Fi", "Indie", "Hip-hop"])
     
-    album = factory.SubFactory('test.factories.AlbumFactory')
-    @factory.post_generation
-    def artist(self, create, extracted, **kwargs):
-        if not create:
-            return
-
-        if extracted:
-            self.artist.extend(extracted)
-        elif self.album:
-            self.artist.append(self.album.artist)
-        else:
-            self.artist.append(ArtistFactory())
-            
-    class Params:
-        single = factory.Trait(
-            album=None
-        )
+    album = None
+    
 
 class AlbumFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -58,12 +43,9 @@ class AlbumFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session = None
 
     name = factory.Faker("sentence", nb_words=3)
-
+    
     artist = factory.SubFactory(ArtistFactory)
-    song = factory.RelatedFactoryList('test.factories.SongFactory',
-                                   factory_related_name='album', 
-                                   size=1, 
-                                   )
+    songs = []
 
 class ToListenFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:

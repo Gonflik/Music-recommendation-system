@@ -19,7 +19,6 @@ def db_session():
     transaction = connection.begin()
 
     session = Session(bind=connection)
-    #ніби можна забрати, якшо тести для кожної моделі в окремому файлі, там і біндити
     for factory_class in all_factories:
         factory_class._meta.sqlalchemy_session = session
 
