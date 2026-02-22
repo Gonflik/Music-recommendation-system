@@ -2,8 +2,8 @@ from .base import Base
 from .rating import Rating #!!!
 from .associations.playlist_song_association import playlist_song_association
 from .associations.artist_song_association import artist_song_association
-from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload
-from sqlalchemy import String, ForeignKey, func, select, CheckConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, Session
+from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, event
 from typing import List, Optional
 from app import db
 
@@ -18,7 +18,7 @@ class Song(Base):
     )
     genre: Mapped[str] #має бути аутодетект хзхз
 
-    album_id: Mapped[int] = mapped_column(ForeignKey("album.id"))
+    album_id: Mapped[int | None] = mapped_column(ForeignKey("album.id"))
 
     artist: Mapped[List["Artist"]] = relationship(
         secondary=artist_song_association,
@@ -41,11 +41,18 @@ class Song(Base):
             raise ValueError("Name too short(min 1 char)")
         return name
     
-    @validates('artist')
-    def validate_artist(self, key, artists):
-        if not artists:
+    @event.listens_for(Session, "before_flush")
+    def check_for_artist(session, flush_context, instances):
+        for obj in session.new | session.dirty:
+            if isinstance(obj, Song):
+                if not obj.artist:
+                    raise ValueError(f"Song with id:{obj.id}. Must have an artist!")
+
+    """@validates('artist')
+    def validate_artist(self, key, artist):
+        if not artist:
             raise ValueError("A song must have at least one artist!")
-        return artists
+        return artist"""
     
     @classmethod
     def get_song_by_id(cls, song_id):
@@ -65,4 +72,5 @@ class Song(Base):
             "name": self.name,
             "length": self.length,
             "artist_name": self.artist[0].name,
+            #dopisat self.album, handling None + yak minat search_for_song_by_query
         }
