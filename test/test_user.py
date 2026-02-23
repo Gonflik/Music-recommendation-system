@@ -14,9 +14,10 @@ def test_user_age_constraint(db_session):
 def test_user_name_len_constraint(db_session):
     with pytest.raises(ValueError):
         user = UserFactory(name='')
+        db_session.flush()
     with pytest.raises(ValueError):
         user = UserFactory(name='598137051434036359116386563415771d')
-        #db_session.flush()
+        db_session.flush()
 
 def test_user_name_none(db_session):
     with pytest.raises(IntegrityError):
