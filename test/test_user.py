@@ -1,5 +1,4 @@
 import pytest
-from app.model import User
 from .factories import UserFactory
 from sqlalchemy.exc import IntegrityError
 
@@ -14,7 +13,10 @@ def test_user_age_constraint(db_session):
     
 def test_user_name_len_constraint(db_session):
     with pytest.raises(ValueError):
-        user = UserFactory(name='A')
+        user = UserFactory(name='')
+    with pytest.raises(ValueError):
+        user = UserFactory(name='598137051434036359116386563415771d')
+        #db_session.flush()
 
 def test_user_name_none(db_session):
     with pytest.raises(IntegrityError):

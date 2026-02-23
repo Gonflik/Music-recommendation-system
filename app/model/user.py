@@ -41,7 +41,7 @@ class User(Base):
     tolisten: Mapped[List["ToListen"]] = relationship(back_populates="user")
 
     __table_args__ = (
-        CheckConstraint("LENGTH(name) > 2 ", name="ck_user_name_length"),
+        CheckConstraint("LENGTH(name) > 0 ", name="ck_user_name_length"),
         CheckConstraint("email LIKE '%_@__%.__%'", name="ck_user_email_form"),
         CheckConstraint("age BETWEEN 6 AND 119", name="ck_user_age_range"),
         CheckConstraint("LENGTH(location) > 2", name="ck_user_location_length")
@@ -56,8 +56,8 @@ class User(Base):
     @validates('name')
     def validate_name(self, key, name):
         if name is not None:
-            if len(name) < 2:
-                raise ValueError("Name too short(min 2 chars)")
+            if len(name) < 1 or len(name) > 32:
+                raise ValueError("Name length out of bounds(1-32 chars)")
         return name
         
     @validates('age')
@@ -69,8 +69,8 @@ class User(Base):
     @validates('location')
     def validate_location(self, key, location):
         if location is not None:
-            if len(location) < 2:
-                raise ValueError("Name of location(country) is too short!(min 2 chars)")
+            if len(location) < 2 or len(location) > 100:
+                raise ValueError("Name of location is out of bounds!(2-100 chars)")
         return location
 
     def check_password(self, password):

@@ -33,14 +33,21 @@ class Song(Base):
 
     __table_args__ = (
         CheckConstraint("LENGTH(name) > 0", name="ck_name_length"),
+        CheckConstraint("length > 30", name="ck_length_value"), 
     )
 
     @validates('name')
     def validate_name(self, key, name):
-        if len(name) < 1:
-            raise ValueError("Name too short(min 1 char)")
+        if len(name) < 1 or len(name) > 50:
+            raise ValueError("Name length out of bounds(1-50 chars)")
         return name
     
+    @validates('length')
+    def validate_length(self,key, length):
+        if length < 30:
+            raise ValueError("Song too short(min length 30s)")
+        return length
+
     @event.listens_for(Session, "before_flush")
     def check_for_artist(session, flush_context, instances):
         for obj in session.new | session.dirty:

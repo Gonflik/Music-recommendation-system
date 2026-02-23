@@ -26,13 +26,21 @@ def test_create_song_single(db_session):
     assert song is not None
     assert song.album is None
 
-def test_song_name_len_constraint(db_session):
-    with pytest.raises(ValueError):
-        song = SongFactory(name='')
-
 def test_song_no_artist(db_session):
     with pytest.raises(ValueError):
         song = SongFactory(artist=[])
         db_session.flush()
+
+def test_song_name_len_constraint(db_session):
+    artist = ArtistFactory()
+    with pytest.raises(ValueError):
+        song = SongFactory(name='', artist=artist)
+        db_session.flush()
+    with pytest.raises(ValueError):
+        song = SongFactory(name='asdashfhhfhhfhffffffffffffffffffffffffffffffffffffffffffffff', artist=artist)
+        db_session.flush()
+def test_song_length_constraint(db_session):
+    with pytest.raises(ValueError):
+        song = SongFactory(length=15)
     
     
