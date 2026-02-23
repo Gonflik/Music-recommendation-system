@@ -1,29 +1,43 @@
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from app.model import Base
+from app import create_app, db
 from .factories import all_factories
 
-engine = create_engine("sqlite://")
-Session = sessionmaker(bind=engine)
+
+
+
+@pytest.fixture(scope="session")
+def app():
+    params = {
+        'SQLALCHEMY_ENGINES': {"default": "postgresql+psycopg://testdranik:dranik322@localhost:5432/testdb"}
+    }
+    _app = create_app(test_config=params)
+    return _app
+
+@pytest.fixture(scope="session")
+def engine(app):
+    with app.app_context():
+        return db.engine
 
 @pytest.fixture(scope="session", autouse=True)
-def db():
-    Base.metadata.create_all(engine)
-    yield
-    Base.metadata.drop_all(engine)
+def setup_db(app, engine):
+    with app.app_context():
+        Base.metadata.create_all(engine)
+        yield
+        Base.metadata.drop_all(engine)
 
 @pytest.fixture(scope="function")
-def db_session():
-    connection = engine.connect()
-    transaction = connection.begin()
+def db_session(app, engine):
+    with app.app_context():
+        connection = engine.connect()
+        transaction = connection.begin()
 
-    session = Session(bind=connection)
-    for factory_class in all_factories:
-        factory_class._meta.sqlalchemy_session = session
+        session = db.session
+        for factory_class in all_factories:
+            factory_class._meta.sqlalchemy_session = session
 
-    yield session
+        yield session
 
-    session.close()
-    transaction.rollback()
-    connection.close()
+        session.close()
+        transaction.rollback()
+        connection.close()

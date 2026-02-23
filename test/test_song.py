@@ -14,7 +14,7 @@ def test_song_relationship(db_session):
     song = SongFactory(artist=[artist], album=album)
     playlist = PlaylistFactory(songs=[song])
     rating = RatingFactory(song=song,user=UserFactory())
-    #if flush(), problem rating needs app.app_context from flask cause of @validates in rating
+    db_session.flush()
     assert len(song.artist) > 0 
     assert song.album is not None
     assert song.playlists is not None
