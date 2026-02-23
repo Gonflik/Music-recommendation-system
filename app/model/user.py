@@ -3,7 +3,6 @@ from .base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from sqlalchemy import String, ForeignKey, Enum, CheckConstraint, select
 from typing import List, Optional
-#from uuid import uuid4
 from app.extensions import db
 import hashlib
 

@@ -13,7 +13,7 @@ def create_app():
     app.config.from_prefixed_env()
     db.init_app(app)
 
-
+    
     app.register_blueprint(user_bp, url_prefix='/user')
     app.register_blueprint(tolisten_bp, url_prefix='/user')
     app.register_blueprint(rating_bp, url_prefix='/user')

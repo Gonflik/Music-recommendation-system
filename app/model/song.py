@@ -54,12 +54,6 @@ class Song(Base):
             if isinstance(obj, Song):
                 if not obj.artist:
                     raise ValueError(f"Song with id:{obj.id}. Must have an artist!")
-
-    """@validates('artist')
-    def validate_artist(self, key, artist):
-        if not artist:
-            raise ValueError("A song must have at least one artist!")
-        return artist"""
     
     @classmethod
     def get_song_by_id(cls, song_id):

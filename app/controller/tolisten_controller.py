@@ -45,22 +45,6 @@ def tolisten_add_album_to_user(user_id):
     tolisten_entry.save()
     return jsonify({"message": "Album succesfully added!"}), 201
     
-    """if album_id:
-        album = Album.get_album_by_id(album_id)
-        if album:
-            tolisten_entry = ToListen(note=note, user_id=user_id, album_id=album_id)
-            tolisten_entry.save()
-            return jsonify({"message": "Album succesfully added!"}), 201
-        return jsonify({"message": "Album not found!"})
-    
-    album_name = data.get('album_name')
-    if album_name:
-        album = Album.get_album_by_name(album_name)
-        if album:
-            tolisten_entry = ToListen(note=note, user_id=user_id, album_id=album.id)
-            tolisten_entry.save()
-            return jsonify({"message": "Album succesfully added!"}), 201
-        return jsonify({"message": "Album not found!"})"""
 @tolisten_bp.delete('/tolisten/<int:user_id>')
 def tolisten_delete_album(user_id):
     data = request.get_json()

@@ -16,7 +16,7 @@ def search():
         "Albums": Album.search_for_album_by_query(query),
         "Playlists": Playlist.search_for_playlist_by_query(query),
     }
-
+    
     final_result = {}
     for key, items in raw_result.items():
         if items:
