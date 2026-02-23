@@ -8,9 +8,15 @@ from .controller.search_engine import search_bp
 
 
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
-    app.config.from_prefixed_env()
+    
+    if test_config:
+        app.config.update(test_config)
+    else:
+        app.config.from_prefixed_env()
+
+    
     db.init_app(app)
 
     
@@ -19,7 +25,7 @@ def create_app():
     app.register_blueprint(rating_bp, url_prefix='/user')
     app.register_blueprint(search_bp, url_prefix='/user')
 
-    with app.app_context():
-        Base.metadata.create_all(db.engine)
+    #with app.app_context():
+    #    Base.metadata.create_all(db.engine) remove # when not Unit testing
     
     return app
