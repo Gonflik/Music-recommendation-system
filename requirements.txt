@@ -5,6 +5,7 @@ dotenv==0.9.9
 factory_boy==3.3.3
 Faker==40.4.0
 Flask==3.1.2
+Flask-JWT-Extended==4.7.1
 Flask-SQLAlchemy-Lite==0.2.1
 greenlet==3.3.1
 iniconfig==2.3.0
@@ -15,8 +16,9 @@ packaging==26.0
 pluggy==1.6.0
 psycopg==3.3.2
 Pygments==2.19.2
+PyJWT==2.11.0
 pytest==9.0.2
 python-dotenv==1.2.1
 SQLAlchemy==2.0.46
 typing_extensions==4.15.0
-Werkzeug==3.1.5
+Werkzeug==3.1.6
