@@ -1,8 +1,6 @@
 from flask import Blueprint, jsonify, request
-from werkzeug.security import generate_password_hash
 from app.model import User
 from app.model.user import GenderEnum
-
 
 user_bp = Blueprint('user',__name__)
 
@@ -21,7 +19,7 @@ def user_register():
     if len(raw_password) < 8:
         return jsonify({"error" : "Password is too short!, (min 8 chars)"}), 400
 
-    hashed_pass = generate_password_hash(raw_password)
+    hashed_pass = User.hash_password(raw_password)
 
     new_user = User(
         name = data.get('name'),
@@ -44,7 +42,8 @@ def user_login():
     if not user:
         return jsonify({"message" : "User not found!"}), 404
 
-    if user.check_password(data.get('password')):
+    password = data.get('password')
+    if User.hash_password(password) == user.password:
         return jsonify({"message": "Logged in!"}), 200
     return jsonify({"message" : "Incorrect password!"}), 401
 

@@ -4,8 +4,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from sqlalchemy import String, ForeignKey, Enum, CheckConstraint, select
 from typing import List, Optional
 #from uuid import uuid4
-from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db
+import hashlib
 
 class UserRole(str, enum.Enum):
     ADMIN = "admin"
@@ -73,17 +73,20 @@ class User(Base):
                 raise ValueError("Name of location is out of bounds!(2-100 chars)")
         return location
 
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
+
+    def hash_password(password):
+        hash_object = hashlib.sha256(password.encode('utf-8'))
+        hash_digest = hash_object.hexdigest()
+        return hash_digest
     
-    #tre static method abo class method?
-    def get_user_by_email(email):
-        stmt = select(User).where(User.email==email)
+    @classmethod
+    def get_user_by_email(cls, email):
+        stmt = select(cls).where(cls.email==email)
         user = db.session.scalar(stmt)
         return user
-    #tre static method abo class method?
-    def get_user_by_id(id):
-        stmt = select(User).where(User.id==id)
+    @classmethod
+    def get_user_by_id(cls, id):
+        stmt = select(cls).where(cls.id==id)
         user = db.session.scalar(stmt)
         return user
 
