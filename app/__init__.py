@@ -1,5 +1,5 @@
-from flask import Flask, Blueprint
-from .extensions import db
+from flask import Flask, jsonify
+from .extensions import db, jwt
 from .model.base import Base
 from .controller.user_controller import user_bp
 from .controller.tolisten_controller import tolisten_bp
@@ -10,7 +10,7 @@ from .controller.search_engine import search_bp
 
 def create_app(test_config=None):
     app = Flask(__name__)
-    
+
     if test_config:
         app.config.update(test_config)
     else:
@@ -18,14 +18,35 @@ def create_app(test_config=None):
 
     
     db.init_app(app)
-
+    jwt.init_app(app)
     
     app.register_blueprint(user_bp, url_prefix='/user')
     app.register_blueprint(tolisten_bp, url_prefix='/user')
     app.register_blueprint(rating_bp, url_prefix='/user')
     app.register_blueprint(search_bp, url_prefix='/user')
 
-    #with app.app_context():
-    #    Base.metadata.create_all(db.engine) remove # when not Unit testing
+    with app.app_context(): #
+        Base.metadata.create_all(db.engine) #add/remove comments for Unit testing       
+
+    #jwt error handlers
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_data):
+        return jsonify({
+            "message": "Token has expired!", 
+            "error": "token_expired"
+            }), 401
+
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        return jsonify({
+            "message": "Signature verification failed!", 
+            "error": "invalid_token"
+            }), 401
     
+    @jwt.unauthorized_loader
+    def missing_token_callback(error):
+        return jsonify({
+            "message": "Request doesnt contain a valid token!", 
+            "error": "authorization_required"
+            }), 401
     return app
