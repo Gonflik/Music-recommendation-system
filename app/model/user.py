@@ -83,11 +83,17 @@ class User(Base):
         stmt = select(cls).where(cls.email==email)
         user = db.session.scalar(stmt)
         return user
+    
     @classmethod
     def get_user_by_id(cls, id):
         stmt = select(cls).where(cls.id==id)
         user = db.session.scalar(stmt)
         return user
+    
+    @classmethod
+    def get_all_users(cls, page, per_page):
+        result = db.paginate(select(cls).order_by(cls.name), page=page,per_page=per_page)
+        return result
 
     def save(self):
         db.session.add(self)
@@ -96,3 +102,13 @@ class User(Base):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+
+    def to_dict(self):
+        return {
+            "email" : self.email,
+            "id" : self.id,
+            "name" : self.name,
+            "age" : self.age,
+            "gender": self.gender,
+            "location": self.location
+        }
