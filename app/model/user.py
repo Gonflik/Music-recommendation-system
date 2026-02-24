@@ -73,26 +73,27 @@ class User(Base):
         return location
 
 
-    def hash_password(password):
+    def hash_password(password: str):
         hash_object = hashlib.sha256(password.encode('utf-8'))
         hash_digest = hash_object.hexdigest()
         return hash_digest
     
     @classmethod
-    def get_user_by_email(cls, email):
+    def get_user_by_email(cls, email: str):
         stmt = select(cls).where(cls.email==email)
         user = db.session.scalar(stmt)
         return user
     
     @classmethod
-    def get_user_by_id(cls, id):
+    def get_user_by_id(cls, id: int):
         stmt = select(cls).where(cls.id==id)
         user = db.session.scalar(stmt)
         return user
     
     @classmethod
-    def get_all_users(cls, page, per_page):
-        result = db.paginate(select(cls).order_by(cls.name), page=page,per_page=per_page)
+    def get_all_users(cls, page: int, per_page: int):
+        stmt = select(cls).limit(per_page).offset((page-1) * per_page)
+        result = db.session.scalars(stmt).all()
         return result
 
     def save(self):
