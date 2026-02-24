@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from .extensions import db, jwt
 from .model.base import Base
+from .model import User
 from .controller.user_controller import user_bp
 from .controller.tolisten_controller import tolisten_bp
 from .controller.rating_controller import rating_bp
@@ -27,6 +28,13 @@ def create_app(test_config=None):
 
     with app.app_context(): #
         Base.metadata.create_all(db.engine) #add/remove comments for Unit testing       
+
+    #jwt user loader
+    @jwt.user_lookup_loader
+    def user_lookup_callback(_jwt_header,jwt_data):
+        identity = jwt_data['sub']
+        return User.get_user_by_email(identity)
+
 
     #jwt error handlers
     @jwt.expired_token_loader
