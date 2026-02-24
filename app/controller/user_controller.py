@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt, current_user, get_jwt_identity
 from app.model import User
 from app.model.user import GenderEnum
 
@@ -60,20 +60,14 @@ def user_login():
         }), 200
     return jsonify({"error" : "Incorrect password!"}), 401
 
-@user_bp.get('/profile/<int:id>')
+@user_bp.get('/profile')
 @jwt_required()
-def user_profile(id):
-    user = User.get_user_by_id(id)
-    if not user:
+def user_profile():
+    if not current_user:
         return jsonify({"error" : "User not found!"}), 404
-    return jsonify({"User" : {
-        "email" : user.email,
-        "id" : user.id,
-        "name" : user.name,
-        "age" : user.age,
-        "gender": user.gender,
-        "location": user.location
-    }})
+    return jsonify(current_user.to_dict())
+    
+    
 
 @user_bp.get('/all')
 @jwt_required()
@@ -87,10 +81,18 @@ def user_get_all():
         return jsonify(results), 200
     return jsonify({"message": "You are not authorized to access this!"}), 401
 
-@user_bp.patch('/profile/<int:id>')
-def user_update_patch(id):
+@user_bp.get('/refresh')
+@jwt_required(refresh=True)
+def refresh_access():
+    identity = get_jwt_identity()
+    new_access_token = create_access_token(identity=identity)
+    return jsonify({"access_token": new_access_token})
+
+@user_bp.patch('/profile')
+@jwt_required()
+def user_update_patch():
     data = request.get_json()
-    user = User.get_user_by_id(id)
+    user = current_user
     if not user:
         return jsonify({"error" : "User not found!"}), 404
     
@@ -114,20 +116,14 @@ def user_update_patch(id):
     user.save()
     
     return jsonify({"message" : "User updated successfully!",
-                    "User" : {
-                        "email" : user.email,
-                        "id" : user.id,
-                        "name" : user.name,
-                        "age" : user.age,
-                        "gender" : user.gender,
-                        "location" : user.location
-                    }
+                    "User" : user.to_dict(),
                     }), 200
 
-@user_bp.put('/profile/<int:id>')
-def user_update_put(id):
+@user_bp.put('/profile')
+@jwt_required()
+def user_update_put():
     data = request.get_json()
-    user = User.get_user_by_id(id)
+    user = current_user
     if not user:
         return jsonify({"error" : "User not found!"}), 404
     
@@ -142,27 +138,22 @@ def user_update_put(id):
     user.save()
 
     return jsonify({"message" : "User updated successfully!",
-                    "User" : {
-                        "email" : user.email,
-                        "id" : user.id,
-                        "name" : user.name,
-                        "age" : user.age,
-                        "gender" : user.gender,
-                        "location" : user.location
-                    }
+                    "User" : user.to_dict(),
                     }), 200
     
-@user_bp.delete('/profile/<int:id>')
-def user_delete(id):
+@user_bp.delete('/profile')
+@jwt_required()
+def user_delete():
     data = request.get_json()
-    user = User.get_user_by_id(id)
+    user = current_user
     if not user:
         return jsonify({"error" : "User not found!"}), 404
     
-    if not data.get('password'):
+    password = data.get('password')
+    if not password:
         return jsonify({"error": "Password required!"}), 400
 
-    if user.check_password(data.get('password')):
+    if User.hash_password(password) == user.password:
         user.delete()
         return jsonify({"message" : "User deleted successfully!"}), 200
     return jsonify({"error" : "Incorrect password!"}), 401
