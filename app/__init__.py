@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from .extensions import db, jwt
 from .model.base import Base
-from .model import User
+from .model import User, TokenBlocklist
 from .controller.user_controller import user_bp
 from .controller.tolisten_controller import tolisten_bp
 from .controller.rating_controller import rating_bp
@@ -57,4 +57,12 @@ def create_app(test_config=None):
             "message": "Request doesnt contain a valid token!", 
             "error": "authorization_required"
             }), 401
+    
+    @jwt.token_in_blocklist_loader
+    def token_in_blocklist_callback(jwt_header, jwt_data):
+        if jwt_data['type'] == 'refresh':   
+            jti = jwt_data['jti']
+            token = TokenBlocklist.select_token_by_jti(jti)
+            return token is not None
+        return False
     return app
