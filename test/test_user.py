@@ -4,12 +4,14 @@ from sqlalchemy.exc import IntegrityError
 
 def test_create_user(db_session):
     user = UserFactory()
-    db_session.flush()
+    db_session.commit()
     assert user is not None
+    assert user.name is not None
+
 
 def test_user_age_constraint(db_session):
     with pytest.raises(ValueError):
-        user = UserFactory(age=3)
+        user = UserFactory(age=3) 
     
 def test_user_name_len_constraint(db_session):
     with pytest.raises(ValueError):
