@@ -2,6 +2,7 @@ import enum
 from .base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from sqlalchemy import String, ForeignKey, Enum, CheckConstraint, select
+from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
 from app.extensions import db
 import hashlib
@@ -18,7 +19,7 @@ class GenderEnum(str, enum.Enum):
 
 class User(Base):
     __tablename__ = "user"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True) 
     name: Mapped[str] = mapped_column(String(32))
     email: Mapped[str] = mapped_column(String(100), unique=True)
@@ -39,6 +40,11 @@ class User(Base):
     ratings: Mapped[List["Rating"]] = relationship(back_populates="user")
     tolisten: Mapped[List["ToListen"]] = relationship(back_populates="user")
 
+
+    def __init__(self, **kw):
+        self.errors = []
+        super().__init__(**kw)
+
     __table_args__ = (
         CheckConstraint("LENGTH(name) > 0 ", name="ck_user_name_length"),
         CheckConstraint("email LIKE '%_@__%.__%'", name="ck_user_email_form"),
@@ -49,27 +55,27 @@ class User(Base):
     @validates('email')
     def validate_email(self, key, address):
         if '@' not in address:
-            raise ValueError("Failed simple email validation!")
+            self.errors.append("Failed simple email validation!")
         return address.lower().strip()
     
     @validates('name')
     def validate_name(self, key, name):
         if name is not None:
             if len(name) < 1 or len(name) > 32:
-                raise ValueError("Name length out of bounds(1-32 chars)")
+                self.errors.append("Name length out of bounds(1-32 chars)")
         return name
         
     @validates('age')
     def validate_age(self, key, age):
         if age < 6 or age > 120:
-            raise ValueError("Invalid age!")
+            self.errors.append("Invalid age!")
         return age
     
     @validates('location')
     def validate_location(self, key, location):
         if location is not None:
             if len(location) < 2 or len(location) > 100:
-                raise ValueError("Name of location is out of bounds!(2-100 chars)")
+                self.errors.append("Name of location is out of bounds!(2-100 chars)")
         return location
 
 
@@ -100,6 +106,7 @@ class User(Base):
         db.session.add(self)
         db.session.commit()
 
+
     def delete(self):
         db.session.delete(self)
         db.session.commit()
@@ -113,3 +120,4 @@ class User(Base):
             "gender": self.gender,
             "location": self.location
         }
+    
