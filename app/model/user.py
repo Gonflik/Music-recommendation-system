@@ -29,7 +29,7 @@ class User(Base):
         default=UserRole.USER,
     )
     password: Mapped[str] 
-    age: Mapped[int]
+    age: Mapped[int | None]
     gender: Mapped[GenderEnum] = mapped_column(
         Enum(GenderEnum, name="user_gender_enum"),
         nullable=False,
@@ -49,14 +49,21 @@ class User(Base):
         CheckConstraint("LENGTH(name) > 0 ", name="ck_user_name_length"),
         CheckConstraint("email LIKE '%_@__%.__%'", name="ck_user_email_form"),
         CheckConstraint("age BETWEEN 6 AND 119", name="ck_user_age_range"),
-        CheckConstraint("LENGTH(location) > 2", name="ck_user_location_length")
+        CheckConstraint("LENGTH(location) > 1", name="ck_user_location_length")
     )
 
+    #validators
     @validates('email')
     def validate_email(self, key, address):
         if '@' not in address:
             self.errors.append("Failed simple email validation!")
         return address.lower().strip()
+    
+    @validates('password')
+    def validate_password(self, key, password):
+        if len(password) < 8:
+            self.errors.append("Password is too short!(min 8 chars)")
+        return password
     
     @validates('name')
     def validate_name(self, key, name):
@@ -67,8 +74,9 @@ class User(Base):
         
     @validates('age')
     def validate_age(self, key, age):
-        if age < 6 or age > 120:
-            self.errors.append("Invalid age!")
+        if age is not None:
+            if age < 6 or age > 120:
+                self.errors.append("Invalid age!")
         return age
     
     @validates('location')
@@ -77,13 +85,22 @@ class User(Base):
             if len(location) < 2 or len(location) > 100:
                 self.errors.append("Name of location is out of bounds!(2-100 chars)")
         return location
-
-
-    def hash_password(password: str):
-        hash_object = hashlib.sha256(password.encode('utf-8'))
-        hash_digest = hash_object.hexdigest()
-        return hash_digest
     
+    @validates('role')
+    def validate_role(self, key, role):
+        if role is not None:
+            if role not in UserRole:
+                self.errors.append("Role is non-existent!")
+        return role
+    
+    @validates('gender')
+    def validate_gender(self, key, gender):
+        if gender is not None:
+            if gender not in GenderEnum:
+                self.errors.append(f"{gender} is not a viable gender option")
+        return gender
+    
+    #get methods/select queries
     @classmethod
     def get_user_by_email(cls, email: str):
         stmt = select(cls).where(cls.email==email)
@@ -102,6 +119,7 @@ class User(Base):
         result = db.session.scalars(stmt).all()
         return result
 
+    #useful methods
     def save(self):
         db.session.add(self)
         db.session.commit()
@@ -120,4 +138,54 @@ class User(Base):
             "gender": self.gender,
             "location": self.location
         }
+    
+    @staticmethod
+    def hash_password(password: str):
+        hash_object = hashlib.sha256(password.encode('utf-8'))
+        hash_digest = hash_object.hexdigest()
+        return hash_digest
+    
+    #register/login and such logic
+    @classmethod
+    def register(cls, data):
+        if User.get_user_by_email(data.get('email')) is not None:
+            return None, {"message": "User already exists!", "code": 409}
+        
+        new_user = User(
+        name = data.get('name'),
+        email = data.get('email'),
+        age = data.get('age'),
+        password = data.get('password'),
+        gender = data.get('gender', 'prefer_not_to_say').lower(),
+        location = data.get('location'),
+        role = data.get('role', 'user')
+        )
+                
+
+        if len(new_user.errors) > 0:
+            return None, {"error": new_user.errors, "code": 400}
+        
+        new_user.password = new_user.hash_password(new_user.password)
+        new_user.save()
+
+        return new_user, None
+
+    @classmethod
+    def login(cls, data):
+        user = User.get_user_by_email(data.get('email'))
+        if not user:
+            return None, {"error": "User not found!", "code": 404}
+        
+        if User.hash_password(data.get('password')) == user.password: 
+            return user, None
+        
+        return None, {"error" : "Incorrect password!", "code": 401}
+        
+
+
+    def update(data):
+        pass
+
+    def delete(data):
+        pass
     
