@@ -91,32 +91,15 @@ def user_logout():
 @user_bp.patch('/profile')
 @jwt_required()
 def user_update_patch():
-    data = request.get_json()
     user = current_user
-    if not user:
+    if not current_user:
         return jsonify({"error" : "User not found!"}), 404
     
-    new_name = data.get('name')
-    new_age = data.get('age')
-    new_gender = data.get('gender').lower()
-    new_location = data.get('location')
-
-    if new_name:
-        user.name = new_name
-
-    if new_age:
-        user.age = new_age
-
-    if new_gender:
-        user.gender = GenderEnum(new_gender)
-    
-    if new_location:
-        user.location = new_location
-
-    if len(user.errors) > 0:
-        return jsonify({"error": user.errors})
-
-    user.save()
+    data = request.get_json()
+    success, errors = user.update(data)
+    if errors:
+        status_code = errors.pop('code', 400)
+        return jsonify(errors), status_code
     
     return jsonify({"message" : "User updated successfully!",
                     "User" : user.to_dict(),
@@ -125,23 +108,20 @@ def user_update_patch():
 @user_bp.put('/profile')
 @jwt_required()
 def user_update_put():
-    data = request.get_json()
     user = current_user
     if not user:
         return jsonify({"error" : "User not found!"}), 404
     
-    if not all(key in data for key in ['name','age','gender','location']):
-        return jsonify({"error" : "Missing requiered fields!"}), 400
+    data = request.get_json()
+    required_fields = ['name','age','gender','location']
+    missing = [miss for miss in required_fields if miss not in data]
+    if missing:
+        return jsonify({"error": "Missing required fields!", "missing": missing, }), 400
     
-    user.age = data.get('age')
-    user.name = data.get('name')
-    user.gender = GenderEnum(data.get('gender', 'prefer_not_to_say').lower())
-    user.location = data.get('location')
-
-    if len(user.errors) > 0:
-        return jsonify({"error": user.errors})
-
-    user.save()
+    success, errors = user.update(data)
+    if errors:
+        status_code = errors.pop('code', 400)
+        return jsonify(errors), status_code
 
     return jsonify({"message" : "User updated successfully!",
                     "User" : user.to_dict(),
@@ -155,13 +135,13 @@ def user_delete():
     if not user:
         return jsonify({"error" : "User not found!"}), 404
     
-    password = data.get('password')
-    if not password:
-        return jsonify({"error": "Password required!"}), 400
-
-    if User.hash_password(password) == user.password:
-        user.delete()
-        return jsonify({"message" : "User deleted successfully!"}), 200
-    return jsonify({"error" : "Incorrect password!"}), 401
+    required_fields = ['password']
+    missing = [miss for miss in required_fields if miss not in data]
+    if missing:
+        return jsonify({"error": "Missing required fields!", "missing": missing, }), 400
+    
+    response, code = user.delete(data)
+    return jsonify(response), code
+    
     
 

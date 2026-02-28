@@ -1,6 +1,6 @@
 import enum
 from .base import Base
-from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates, reconstructor
 from sqlalchemy import String, ForeignKey, Enum, CheckConstraint, select
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
@@ -40,6 +40,10 @@ class User(Base):
     ratings: Mapped[List["Rating"]] = relationship(back_populates="user")
     tolisten: Mapped[List["ToListen"]] = relationship(back_populates="user")
 
+
+    @reconstructor
+    def init_on_load(self):
+        self.errors = []
 
     def __init__(self, **kw):
         self.errors = []
@@ -124,11 +128,6 @@ class User(Base):
         db.session.add(self)
         db.session.commit()
 
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
     def to_dict(self):
         return {
             "email" : self.email,
@@ -181,11 +180,35 @@ class User(Base):
         
         return None, {"error" : "Incorrect password!", "code": 401}
         
+    def update(self, data):
+        
+        new_name = data.get('name')
+        new_age = data.get('age')
+        new_gender = data.get('gender')
+        new_location = data.get('location')
 
+        if new_name is not None:
+            self.name = new_name
 
-    def update(data):
-        pass
+        if new_age is not None:
+            self.age = new_age
 
-    def delete(data):
-        pass
+        if new_gender is not None:
+            self.gender = new_gender.lower()
+        
+        if new_location is not None:
+            self.location = new_location
+
+        if len(self.errors) > 0:
+            return False, {"error": self.errors, "code": 400}
+        
+        self.save()
+        return True, None
+
+    def delete(self, data):
+        if User.hash_password(data.get('password')) == self.password:
+            db.session.delete(self)
+            db.session.commit()
+            return {"message" : "User deleted successfully!"}, 200
+        return {"error" : "Incorrect password!"}, 401
     
