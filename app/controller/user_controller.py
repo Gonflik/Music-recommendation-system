@@ -11,54 +11,43 @@ user_bp = Blueprint('user',__name__)
 @user_bp.post('/register')
 def user_register():
     data = request.get_json()
-    if not data.get('email'):
-        return jsonify({"error": "Email required!"}), 400
-
-    user = User.get_user_by_email(data.get('email'))
-    if user is not None:
-        return jsonify({"error" : "User already exists"}), 409
+    required_fields = ['email', 'password', 'name']
+    missing = [miss for miss in required_fields if miss not in data]
+    if missing:
+        return jsonify({"error": "Missing required fields!", "missing": missing}), 400
     
-    raw_password = data.get('password')
+    user, errors = User.register(data)
 
-    if len(raw_password) < 8:
-        return jsonify({"error" : "Password is too short!, (min 8 chars)"}), 400
-
-    hashed_pass = User.hash_password(raw_password)
-
-    new_user = User(
-        name = data.get('name'),
-        email = data.get('email'),
-        age = data.get('age'),
-        password = hashed_pass,
-        gender = GenderEnum(data.get('gender', 'prefer_not_to_say').lower()),
-        location = data.get('location'),
-        role = data.get('role')
-    )
-    
-    
-    new_user.save()
+    if errors:
+        status_code = errors.pop('code', 400)
+        return jsonify(errors), status_code
 
     return jsonify({"message" : "User created"}), 201
 
 @user_bp.post('/login')   
 def user_login():
     data = request.get_json()
-    user = User.get_user_by_email(data.get('email'))
-    if not user:
-        return jsonify({"error" : "User not found!"}), 404
+    required_fields = ['email', 'password']
+    missing = [miss for miss in required_fields if miss not in data]
+    if missing:
+        return jsonify({"error": "Missing required fields!", "missing": missing, }), 400
 
-    password = data.get('password')
-    if User.hash_password(password) == user.password:
-        access_token = create_access_token(identity=user.email, additional_claims={"role": user.role}) 
-        refresh_token = create_refresh_token(identity=user.email, additional_claims={"role": user.role}) 
-        return jsonify({
+    user, errors = User.login(data)
+
+    if errors:
+        status_code = errors.pop('code', 400)
+        return jsonify(errors), status_code
+    
+    access_token = create_access_token(identity=user.email, additional_claims={"role": user.role}) 
+    refresh_token = create_refresh_token(identity=user.email, additional_claims={"role": user.role})
+
+    return jsonify({
             "message": "Logged in!",
             "tokens": {
                 "access": access_token,
                 "refresh": refresh_token
             }
         }), 200
-    return jsonify({"error" : "Incorrect password!"}), 401
 
 @user_bp.get('/profile')
 @jwt_required()
@@ -124,6 +113,9 @@ def user_update_patch():
     if new_location:
         user.location = new_location
 
+    if len(user.errors) > 0:
+        return jsonify({"error": user.errors})
+
     user.save()
     
     return jsonify({"message" : "User updated successfully!",
@@ -145,6 +137,9 @@ def user_update_put():
     user.name = data.get('name')
     user.gender = GenderEnum(data.get('gender', 'prefer_not_to_say').lower())
     user.location = data.get('location')
+
+    if len(user.errors) > 0:
+        return jsonify({"error": user.errors})
 
     user.save()
 
