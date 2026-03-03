@@ -21,19 +21,22 @@ def create_app(test_config=None):
     db.init_app(app)
     jwt.init_app(app)
     
-    app.register_blueprint(user_bp, url_prefix='/user')
-    app.register_blueprint(tolisten_bp, url_prefix='/user')
-    app.register_blueprint(rating_bp, url_prefix='/user')
-    app.register_blueprint(search_bp, url_prefix='/user')
+    app.register_blueprint(user_bp)
+    app.register_blueprint(tolisten_bp)
+    app.register_blueprint(rating_bp)
+    app.register_blueprint(search_bp)
 
-    with app.app_context(): #
-        Base.metadata.create_all(db.engine) #add/remove comments for Unit testing       
+    if test_config:
+        pass
+    else:
+        with app.app_context(): 
+            Base.metadata.create_all(db.engine)        
 
     #jwt user loader
-    @jwt.user_lookup_loader
+    """@jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header,jwt_data):
         identity = jwt_data['sub']
-        return User.get_user_by_email(identity)
+        return User.get_user_by_email(identity)"""
 
 
     #jwt error handlers
