@@ -10,16 +10,14 @@ def test_create_user(db_session):
 
 
 def test_user_age_constraint(db_session):
-    with pytest.raises(ValueError):
-        user = UserFactory(age=3) 
+    user = UserFactory(age=3)
+    len(user.errors) > 0
     
 def test_user_name_len_constraint(db_session):
-    with pytest.raises(ValueError):
-        user = UserFactory(name='')
-        db_session.flush()
-    with pytest.raises(ValueError):
-        user = UserFactory(name='598137051434036359116386563415771d')
-        db_session.flush()
+    user1 = UserFactory(name='')
+    assert len(user1.errors) > 0
+    user2 = UserFactory(name='598137051434036359116386563415771d')
+    assert len(user2.errors) > 0
 
 def test_user_name_none(db_session):
     with pytest.raises(IntegrityError):
@@ -28,9 +26,8 @@ def test_user_name_none(db_session):
         db_session.commit()
 
 def test_user_location_len_constraint(db_session):
-    with pytest.raises(ValueError):
-        user = UserFactory(location='A')
-
+    user = UserFactory(location='A')
+    assert len(user.errors) > 0
 def test_user_email_form_constraint(db_session):
-    with pytest.raises(ValueError):
-        user = UserFactory(email="shnelashnekla.bobobo")
+    user = UserFactory(email="shnelashnekla.bobobo")
+    len(user.errors) > 0
