@@ -2,3 +2,6 @@
 filterwarnings = [
     "ignore::sqlalchemy.exc.SAWarning"
 ]
+markers = [
+    "integration: marks tests as integration tests",
+]
