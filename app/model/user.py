@@ -151,13 +151,12 @@ class User(Base):
             return None, {"message": "User already exists!", "code": 409}
         
         new_user = User(
-        name = data.get('name'),
-        email = data.get('email'),
-        age = data.get('age'),
-        password = data.get('password'),
-        gender = data.get('gender', 'prefer_not_to_say').lower(),
-        location = data.get('location'),
-        role = data.get('role', 'user')
+            name = data.get('name'),
+            email = data.get('email'),
+            age = data.get('age'),
+            password = data.get('password'),
+            gender = data.get('gender', 'prefer_not_to_say').lower(),
+            location = data.get('location')
         )
                 
 
@@ -209,6 +208,6 @@ class User(Base):
         if User.hash_password(data.get('password')) == self.password:
             db.session.delete(self)
             db.session.commit()
-            return {"message" : "User deleted successfully!"}, 200
-        return {"error" : "Incorrect password!"}, 401
+            return True, {"message" : "User deleted successfully!", "code": 200}
+        return False, {"error" : "Incorrect password!", "code": 401}
     
