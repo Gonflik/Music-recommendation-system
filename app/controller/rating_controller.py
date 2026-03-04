@@ -1,35 +1,54 @@
 from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required, current_user, get_jwt_identity
 from app.model import Rating, User, Album, Song
 
 rating_bp = Blueprint('rating', __name__)
 
 
-@rating_bp.get('/rating/<int:user_id>')
-def rating_get(user_id):
-    entries = Rating.get_all_ratings_by_user_id(user_id)
-    results = []
-    for entry in entries:
-        if entry.album is not None:
-            obj = entry.album
-            artist_name = [obj.artist.name]
-        else:
-            obj = entry.song
-            artist_name = [artist.name for artist in obj.artist]
-        results.append({
-            "id": entry.id,
-            "score": entry.score,
-            "description": entry.description,
-            f"{obj.__class__.__name__}": {
-                "id": obj.id,
-                "name": obj.name,
-                "length": obj.length,
-                "artist_name": artist_name,
-            },
-        })
-    return jsonify(results)
+@rating_bp.get('/users/<int:user_id>/ratings')
+@jwt_required
+def rating_get_all_for_user(user_id):
+    current_user = User.get_user_by_id(user_id)
+    if not current_user:
+        return jsonify({"error" : "User not found!"}), 404
+    
+    if get_jwt_identity() != current_user.email:
+        return jsonify({"message": "You are not authorized to access this!"}), 401
+    
+    ratings = Rating.get_all_ratings_by_user_id(user_id)
+    
+    return jsonify([rating.to_dict()] for rating in ratings), 200
+
+@rating_bp.get('/users/ratings')
+@jwt_required
+def rating_get_all(user_id):
+    pass
+
+@rating_bp.post('/artists/<int:artist_id>/albums/<int:album_id>/ratings')
+@jwt_required
+def rating_create_for_album(artist_id, album_id):
+    user = current_user
+    if not current_user:
+        return jsonify({"error" : "User not found!"}), 404
+
+    data = request.get_json()
+
+    required_fields = ['score', 'description']
+    missing = [miss for miss in required_fields if miss not in data]
+    if missing:
+        return jsonify({"error": "Missing required fields!", "missing": missing, }), 400
+    
+    #needs to be finished
+
+@rating_bp.post('/artists/<int:artist_id>/songs/<int:song_id>/ratings')
+@jwt_required
+def rating_create_for_song(artist_id, song_id):
+    pass
 
 
+#old POST
 @rating_bp.post('/rating/<int:user_id>')
+@jwt_required
 def rating_create(user_id):
     data = request.get_json()
     user = User.get_user_by_id(user_id)
