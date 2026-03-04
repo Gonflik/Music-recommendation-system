@@ -1,4 +1,6 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship, validates, joinedload, load_only, selectinload
+from sqlalchemy.orm import (Mapped, mapped_column, relationship, 
+                            validates, joinedload, load_only, 
+                            selectinload, reconstructor)
 from sqlalchemy import String, Text, CheckConstraint, ForeignKey, select, UniqueConstraint
 from typing import List, Optional
 from app import db
@@ -19,6 +21,14 @@ class Rating(Base):
     song: Mapped["Song"] = relationship(back_populates="ratings")
     user: Mapped["User"] = relationship(back_populates="ratings")
 
+    @reconstructor
+    def init_on_load(self):
+        self.errors = []
+
+    def __init__(self, **kw):
+        self.errors = []
+        super().__init__(**kw)
+
     __table_args__ = (
         CheckConstraint(
                 "score BETWEEN 0 and 10",
@@ -29,17 +39,21 @@ class Rating(Base):
         )
     
     @classmethod
-    def get_all_ratings_by_user_id(cls, user_id):
+    def get_all_ratings_by_user_id(cls, user_id, page: int, per_page: int):
         from .song import Song
         from .album import Album
         from .artist import Artist
         stmt = select(cls).where(cls.user_id==user_id).options(
             joinedload(cls.song).load_only(Song.id,Song.name,Song.length).selectinload(Song.artist).load_only(Artist.name),
             joinedload(cls.album).load_only(Album.id,Album.name,Album.length).joinedload(Album.artist).load_only(Artist.name),
-        )
+        ).limit(per_page).offset((page-1) * per_page)
         result = db.session.scalars(stmt).unique().all()
         return result
     
+    @classmethod
+    def get_all_ratings_album_artist(cls, smthg, smthg1):
+        pass
+
     @classmethod
     def get_one_rating_by_id(cls, rating_id):
         stmt = select(cls).where(cls.id==rating_id)
@@ -75,3 +89,38 @@ class Rating(Base):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+
+    #should only be used after the def get_rating functions
+    def to_dict(self):
+        target = self.album if self.album else self.song
+
+        if self.album:
+            artist_names = [target.artist.name]
+        else:
+            artist_names = [artist.name for artist in target.artist]
+
+        return {
+            "id": self.id,
+            "score": self.score,
+            "description": f"{self.description[:100]}...",
+            f"{target.__class__.name}": {
+                "id": target.id,
+                "name": target.name,
+                "length": target.length, #btw for every length of album a query is run
+                "artist_name": artist_names
+            },
+        }
+
+    @classmethod
+    def rate_album(cls, artist_id, album_id):
+        #check if artist exists
+        #check if album exists
+        #proceed to create rating, maybe some other checks
+        pass
+
+    @classmethod
+    def rate_song(cls, artist_id, song_id):
+        #check if artist exists
+        #check if song exists
+        #proceed to create rating, maybe some other checks
+        pass
