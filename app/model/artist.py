@@ -37,6 +37,12 @@ class Artist(Base):
         result = db.session.scalars(stmt).all()
         return result
     
+    @classmethod
+    def get_artist_by_id(cls, artist_id):
+        stmt = select(cls).where(cls.id==artist_id)
+        result = db.session.scalar(stmt)
+        return result
+
     def to_dict(self):
         return {
             "id": self.id,
