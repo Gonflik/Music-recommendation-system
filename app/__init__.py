@@ -33,10 +33,10 @@ def create_app(test_config=None):
             Base.metadata.create_all(db.engine)        
 
     #jwt user loader
-    """@jwt.user_lookup_loader
+    @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header,jwt_data):
         identity = jwt_data['sub']
-        return User.get_user_by_email(identity)"""
+        return User.get_user_by_email(identity)
 
 
     #jwt error handlers
