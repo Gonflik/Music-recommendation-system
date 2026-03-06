@@ -57,9 +57,7 @@ def user_profile(user_id):
     if not current_user:
         return jsonify({"error" : "User not found!"}), 404
     
-    if get_jwt_identity() == current_user.email:
-        return jsonify(current_user.to_dict()), 200
-    return jsonify({"message": "You are not authorized to access this!"}), 401
+    return jsonify(current_user.to_dict()), 200
     
     
 
@@ -67,13 +65,12 @@ def user_profile(user_id):
 @jwt_required()
 def user_get_all():
     claims = get_jwt()
-    if claims.get('role') == "admin":
-        page = request.args.get('page', default=1, type=int)
-        per_page = request.args.get('per_page', default=5, type=int)
-        all_users = User.get_all_users(page, per_page)
-        results = {"Users": [user.to_dict() for user in all_users]}
-        return jsonify(results), 200
-    return jsonify({"message": "You are not authorized to access this!"}), 401
+    
+    page = request.args.get('page', default=1, type=int)
+    per_page = request.args.get('per_page', default=5, type=int)
+    all_users = User.get_all_users(page, per_page)
+    results = {"Users": [user.to_dict() for user in all_users]}
+    return jsonify(results), 200
 
 @user_bp.get('/refresh')
 @jwt_required(refresh=True)

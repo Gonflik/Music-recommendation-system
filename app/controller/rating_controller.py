@@ -12,9 +12,6 @@ def rating_get_all_for_user(user_id):
     if not current_user:
         return jsonify({"error" : "User not found!"}), 404
     
-    if get_jwt_identity() != current_user.email:
-        return jsonify({"message": "You are not authorized to access this!"}), 401
-    
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=5, type=int)
     all_ratings = Rating.get_all_ratings_by_user_id(user_id, page, per_page)
