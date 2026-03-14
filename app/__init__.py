@@ -5,7 +5,7 @@ from .model import User, TokenBlocklist
 from .controller.user_controller import user_bp
 from .controller.tolisten_controller import tolisten_bp
 from .controller.rating_controller import rating_bp
-from .controller.search_engine import search_bp
+from .controller.search_controller import search_bp
 
 
 
