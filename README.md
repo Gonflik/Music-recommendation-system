@@ -4,4 +4,6 @@ so like a program that reccomends music, buuuuuut you can also rate the music, a
 
 Figma diagram for the project: [the diagram](https://www.figma.com/board/N0pxGvjtGdsVxDgebz4rsX/Music-database?node-id=0-1&t=jx4w3V8kEOSifjlO-1)
 
+Figma sequence diagram for the project: [sequence diagram](https://www.figma.com/board/uapBxZakk8wbqJZ62jd1eA/MRS-Sequence-diagram?node-id=0-1&t=2fRAbCc9JPyWGPw1-1)
+
 Database schema: [schema.sql](/MRS_schema.sql)
