@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates, reconstructor
 from sqlalchemy import String, CheckConstraint, select, cast, or_
 from sqlalchemy.dialects.postgresql import ARRAY
 from typing import List, Optional
@@ -30,22 +30,18 @@ class Artist(Base):
         CheckConstraint("LENGTH(name) > 0", name="ck_artist_name_length"),
     )
 
-    @validates('name')
-    def validate_name(self, key, name):
-        if len(name) < 1:
-            raise ValueError("Name too short(min 1 char)")
-        return name
-    
     @classmethod
     def search_for_artist_by_query(cls, query):
         stmt = select(cls).where(or_(
             cls.name.ilike(f"%{query}%"),
             cls.foreign_name.ilike(f"%{query}%"),
-            cast(cls.aliases, String).ilike(f"{query}") 
+            cast(cls.aliases, String).ilike(f"%{query}%") 
         )).limit(10) #injection REVIEW
         result = db.session.scalars(stmt).all()
         if not result:
             artists = MBAPI.get_artist_by_name(query)
+            if not artists:
+                return False
             result = Artist.write_artist(artists)
             return result
         return result
@@ -59,15 +55,31 @@ class Artist(Base):
     @classmethod
     def write_artist(cls, artist_data):
         result: list[Artist] = []
+        
         for item in artist_data:
-            name = item['name']
-            foreign_name = item['foreign_name']
+            print(f"DEBUG: Processing item -> {item}")
             mbid = item['mbid']
-            description = item['description']
-            aliases = item['aliases']
-            new_artist = Artist(name=name, foreign_name=foreign_name, mbid=mbid, description=description, aliases=aliases)
+        
+            existing_artist = db.session.execute(
+                select(cls).filter_by(mbid=mbid)
+            ).scalar_one_or_none()
+
+            if existing_artist:
+                result.append(existing_artist)
+                continue
+            
+            new_artist = Artist(
+                name=item['name'],
+                foreign_name=item['foreign_name'],
+                mbid=mbid,
+                description=item['description'],
+                aliases=item['aliases']
+            )
+            
             result.append(new_artist)
-            new_artist.save()
+            db.session.add(new_artist)
+            db.session.flush()
+        db.session.commit()
         return result
 
     def save(self):
@@ -80,5 +92,5 @@ class Artist(Base):
             "name": self.name,
             "foreign_name": self.foreign_name,
             "description": self.description if self.description else "empty",
-            "aliases": self.aliases
+            "aliases": self.aliases[:3]
         }

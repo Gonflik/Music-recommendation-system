@@ -23,6 +23,7 @@ class ArtistFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     name = factory.Faker("name")
     description = factory.Faker("sentence")
+    mbid = factory.Faker("sentence")
     age = factory.Faker("random_int", min=6, max=120)
 
 class SongFactory(factory.alchemy.SQLAlchemyModelFactory):

@@ -1,5 +1,6 @@
 import pytest
 import json
+from unittest.mock import patch
 from app.model import Base
 from app import create_app, db
 from .factories import all_factories
@@ -89,3 +90,36 @@ def auth_data(client, mock_user_data):
         "user_id": user_id,
         "refresh": refresh_token
     }
+
+@pytest.fixture
+def mock_api_artist_data():
+    return 
+
+"""@pytest.fixture
+def mock_api_response(client):
+    with patch('client.get') as mock_get:
+        yield mock_get"""
+
+@pytest.fixture
+def mock_api_response(mock_api_artist_data):
+    with patch('app.services.musicbrainz_client.musicbrainzngs.search_artists') as mock_search:
+        mock_search.return_value = {
+            'artist-list': [
+                {
+                    "name": "Bobrik",
+                    "foreign_name": "Бобрік",
+                    "disambiguation": "Aspiring artist",
+                    "id": "12314jdnfjf-asndadn12-12ksdfks",
+                    "alias-list": [{"alias": "bobr"}]
+                } 
+            ]
+        }
+        yield mock_search
+
+@pytest.fixture
+def mock_api_response_none(mock_api_artist_data):
+    with patch('app.services.musicbrainz_client.musicbrainzngs.search_artists') as mock_search:
+        mock_search.return_value = {
+            "artist-list": None
+        }
+        yield mock_search

@@ -1,5 +1,5 @@
-#from ..model import Artist
 import musicbrainzngs
+
 
 class MBAPI:
     user_agent = musicbrainzngs.set_useragent("MRS", 1.0, "danylobucharov@gmail.com")
@@ -34,7 +34,7 @@ class MBAPI:
         result = musicbrainzngs.search_artists(query=search_query, limit=3)
         artist_list = result.get('artist-list')
         if not artist_list:
-            return f"Artist not found!(empty list)"
+            return False
 
         formatted_artists = []
         for item in artist_list:
@@ -48,10 +48,10 @@ class MBAPI:
                 if s_name := dic.get("sort-name"): aliases.add(s_name)
                 if dic.get("locale") == "en" and dic.get("primary"):
                     foreign_name = val
-
-                aliases.discard(original_name)
-                if foreign_name:
-                    aliases.discard(foreign_name)
+                
+            aliases.discard(original_name)
+            if foreign_name:
+                aliases.discard(foreign_name)
 
             formatted_artists.append({
                 "name": original_name,
@@ -98,12 +98,12 @@ class MBAPI:
     
 
 
-"""try:
-    artist = MBAPI.get_artist_by_name(search_query="My dead girlfriend")
+try:
+    artist = MBAPI.get_artist_by_name(search_query="Пошлая Молли")
     for i in artist:
         print(i)
 except ValueError as e:
-    print({"Error": e})"""
+    print({"Error": e})
 
 """try:
     songs = MBAPI.get_artist_by_name(search_query="I never told you what i do for a living")

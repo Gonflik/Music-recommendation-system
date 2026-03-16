@@ -9,7 +9,7 @@ from app import db
 
 class Song(Base):
     __tablename__ = "song"
-
+    
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(50))
     length: Mapped[int]
