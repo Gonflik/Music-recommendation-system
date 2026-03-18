@@ -95,10 +95,6 @@ def auth_data(client, mock_user_data):
 def mock_api_artist_data():
     return 
 
-"""@pytest.fixture
-def mock_api_response(client):
-    with patch('client.get') as mock_get:
-        yield mock_get"""
 
 @pytest.fixture
 def mock_api_response(mock_api_artist_data):

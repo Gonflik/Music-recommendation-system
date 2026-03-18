@@ -1,6 +1,6 @@
 import pytest
 from app.model import User
-from .factories import SongFactory, AlbumFactory, PlaylistFactory, RatingFactory, ArtistFactory, UserFactory
+from ..factories import SongFactory, AlbumFactory, PlaylistFactory, RatingFactory, ArtistFactory, UserFactory
 
 def test_create_valid_song(db_session):
     artist = ArtistFactory()

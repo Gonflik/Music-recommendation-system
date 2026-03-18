@@ -1,5 +1,5 @@
 import pytest
-from .factories import UserFactory
+from ..factories import UserFactory
 from sqlalchemy.exc import IntegrityError
 
 def test_create_user(db_session):
