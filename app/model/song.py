@@ -1,23 +1,25 @@
 from .base import Base
 from .rating import Rating #!!!
+from .artist import Artist
 from .associations.playlist_song_association import playlist_song_association
 from .associations.artist_song_association import artist_song_association
 from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, Session
 from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, event
 from typing import List, Optional
 from app import db
+from ..services import MBAPI
 
 class Song(Base):
     __tablename__ = "song"
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    mbid: Mapped[str] = mapped_column(unique=True)
     name: Mapped[str] = mapped_column(String(50))
     length: Mapped[int]
     avg_rating = column_property(
         select(func.avg(Rating.score)).where(Rating.song_id == id).correlate_except(Rating).scalar_subquery()
     )
-    genre: Mapped[str] #має бути аутодетект хзхз
-
+    
     album_id: Mapped[int | None] = mapped_column(ForeignKey("album.id"))
 
     artist: Mapped[List["Artist"]] = relationship(
@@ -38,8 +40,8 @@ class Song(Base):
 
     @validates('name')
     def validate_name(self, key, name):
-        if len(name) < 1 or len(name) > 50:
-            raise ValueError("Name length out of bounds(1-50 chars)")
+        if len(name) < 1:
+            raise ValueError("Name is too short!(min 1 char)")
         return name
     
     @validates('length')
@@ -65,7 +67,50 @@ class Song(Base):
     def search_for_song_by_query(cls, query):
         stmt = select(cls).options(joinedload(cls.artist)).where(cls.name.ilike(f"%{query}%")).limit(10)
         result = db.session.scalars(stmt).unique().all()
+        if not result:
+            songs, artists = MBAPI.get_song_by_name_with_artists(query)
+            if not songs:
+                return False
+            result = Song.write_songs_with_artists(songs,artists)
+            return result
         return result
+    
+    @classmethod
+    def write_songs_with_artists(cls, song_data, artist_data):
+        result: list[Song] = []
+        artists = Artist.write_artist(artist_data)
+
+        for item in song_data:
+            print(f"DEBUG: Processing SONG item -> {item}")
+            mbid = item['mbid']
+        
+            # existing_artist = db.session.execute(
+            #     select(cls).filter_by(mbid=mbid)
+            # ).scalar_one_or_none()
+            
+            # if existing_artist:
+            #     result.append(existing_artist)
+            #     continue
+            
+            new_song = Song(
+                name=item.get('name'),
+                mbid=mbid,
+                length=item.get('length'),
+                #album_id=tre dopisat shob she album davalo
+            )
+            artist = None
+            for art in artists:
+                if art.mbid==item.get('artist_mbid'):
+                    artist = art
+            new_song.artist.append(artist)
+            
+            result.append(new_song)
+            db.session.add(new_song)
+            db.session.flush()
+        db.session.commit()
+        return result
+
+
     
     def to_dict(self):
         return {

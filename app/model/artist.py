@@ -63,7 +63,7 @@ class Artist(Base):
             existing_artist = db.session.execute(
                 select(cls).filter_by(mbid=mbid)
             ).scalar_one_or_none()
-
+            
             if existing_artist:
                 result.append(existing_artist)
                 continue
