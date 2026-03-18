@@ -1,8 +1,10 @@
 import musicbrainzngs
+from .mappers import SongMapper, ArtistMapper
+
 
 
 class MBAPI:
-    user_agent = musicbrainzngs.set_useragent("MRS", 1.0, "danylobucharov@gmail.com")
+    musicbrainzngs.set_useragent("MRS", 1.0, "danylobucharov@gmail.com")
 
     """def get_artist_by_name(search_query, album):
         result = musicbrainzngs.search_artists(query=search_query, limit=1)
@@ -31,61 +33,22 @@ class MBAPI:
             print(f"Type: {group.get('primary-type', 'N/A')}")"""
 
     def get_artist_by_name(search_query: str):
-        result = musicbrainzngs.search_artists(query=search_query, limit=3)
-        artist_list = result.get('artist-list')
-        if not artist_list:
-            return False
+        request = musicbrainzngs.search_artists(query=search_query, limit=3)
 
-        formatted_artists = []
-        for item in artist_list:
-            alias_list = item.get('alias-list', [])
-            aliases = set()
+        artist_list = request.get('artist-list', [])
+        parsed_data = ArtistMapper.map_artist(artist_list)
 
-            original_name = item.get("name", "No-name")
-            foreign_name = None
-            for dic in alias_list:
-                if val := dic.get("alias"): aliases.add(val)
-                if s_name := dic.get("sort-name"): aliases.add(s_name)
-                if dic.get("locale") == "en" and dic.get("primary"):
-                    foreign_name = val
-                
-            aliases.discard(original_name)
-            if foreign_name:
-                aliases.discard(foreign_name)
 
-            formatted_artists.append({
-                "name": original_name,
-                "foreign_name": foreign_name,
-                "mbid": item.get("id"),
-                "description": item.get("disambiguation", "empty"),
-                "aliases": list(aliases)
-            })
-        return formatted_artists
-    
-    def get_song_by_name(search_query: str):
-        lucene_query = (
-            f'recording:"{search_query}" AND status:official'
-        )
-        result = musicbrainzngs.search_recordings(query=search_query, limit=5)
-        recordings = result.get('recording-list')
-        if not recordings:
-            return f"Song not found!(empty list)"
+        return parsed_data
         
-        formatted_songs = []
-        for item in recordings:
-            all_credits = item.get('artist-credit', [])
-            primary_artist_id = all_credits[0].get('artist', {}).get('id') if all_credits else None
+    
+    def get_song_by_name_with_artists(search_query: str) -> tuple[list[dict], list[dict]]:
+        request = musicbrainzngs.search_recordings(query=search_query, limit=3)
+        recordings = request.get('recording-list')
 
-            formatted_songs.append({
-                "name": item.get('title'),
-                "mbid": item.get('id'),
-                "length": int(item.get("length", 0)) // 1000,
-                "artist_name": item.get('artist-credit-phrase'),
-                "artist_mbid": primary_artist_id,
-                "album": item.get('release-list', [{}])[0].get('title', "Single"),
-            })
-
-        return formatted_songs
+        parsed_song, parsed_artist = SongMapper.map_song_with_artist(recordings)
+        return parsed_song, parsed_artist
+        
         
     def get_album_by_name(search_query: str):
         pass
@@ -98,16 +61,28 @@ class MBAPI:
     
 
 
-try:
-    artist = MBAPI.get_artist_by_name(search_query="Пошлая Молли")
-    for i in artist:
-        print(i)
-except ValueError as e:
-    print({"Error": e})
 
-"""try:
-    songs = MBAPI.get_artist_by_name(search_query="I never told you what i do for a living")
-    for i in songs:
-        print(i)
-except Exception as e:
-    print({"Error": e})"""
+
+
+# try:
+#     artist = MBAPI.get_artist_by_name(search_query="Zwyntar")
+#     for i in artist:
+#         print("---------------------------------------------------------------------------")
+#         print(i)
+#         print("---------------------------------------------------------------------------")
+# except ValueError as e:
+#     print({"Error": e})
+
+# try:
+    # songs, artists = MBAPI.get_song_by_name_with_artists(search_query="Miles Davis")
+    # for x in songs:
+    #     print("---------------------------------------------------------------------------")
+    #     print(x)
+    #     print("---------------------------------------------------------------------------")
+    # print("--------------------ARTISTS------------------------")
+    # for y in artists:
+    #     print("---------------------------------------------------------------------------")
+    #     print(y)
+    #     print("---------------------------------------------------------------------------")
+# except Exception as e:
+#     print({"Error": e})
