@@ -42,7 +42,7 @@ class DEEZNUTSAPI:
                 "dzid": song.id,
                 "length": song.duration,
                 "song_position": song.track_position,
-                "picture": song.md5_image,
+                "picture": song.album.cover,
                 "preview": song.preview,
                 "artist_name": song.artist.name,
                 "artist_dzid": song.artist.id,
@@ -144,7 +144,7 @@ class DEEZNUTSAPI:
 #     print(i)
 
 
-# songe, albumi, artisto = DEEZNUTSAPI.get_song_by_name(query="Bigmouth strikes again")
+# songe, albumi, artisto = DEEZNUTSAPI.get_song_by_name(query="Hey Jude")
 # print('-----------------------------SONGS---------------------------')
 # for i in songe:
 #     print(i)
