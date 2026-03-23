@@ -16,14 +16,11 @@ def search():
     if not artists:
         return jsonify({"error":"Artist not found!"}), 404
     
-    songs = Song.search_for_song_by_query(query)
-    if not songs:
-        return jsonify({"error":"Song not found!"}), 404
 
     
     raw_result = {
         "Artists": [artist.to_dict() for artist in artists],
-        "Songs": [song.to_dict() for song in songs],
+        #"Songs": [song.to_dict() for song in songs],
         #"Albums": Album.search_for_album_by_query(query),
         #"Playlists": Playlist.search_for_playlist_by_query(query),
     }
