@@ -10,10 +10,13 @@ class Album(Base):
     __tablename__ = "album"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(100))
-    length: Mapped[int] = column_property(
-        select(func.sum(Song.length)).where(Song.album_id == id).correlate_except(Song).scalar_subquery()
-    )
+    dzid: Mapped[int]
+    name: Mapped[str] = mapped_column(String(200))
+    length: Mapped[int]
+    #release_date: Mapped[int]
+    picture: Mapped[str]
+    #genres: Mapped[List[Genres]] 
+    
     avg_rating: Mapped[float] = column_property(
         select(func.avg(Rating.score)).where(Rating.song_id == id).correlate_except(Rating).scalar_subquery()
     )
@@ -56,7 +59,9 @@ class Album(Base):
     def to_dict(self):
         return {
             "id": self.id,
+            "dzid": self.dzid,
             "name": self.name,
             "length": self.length,
-            "artist_name": self.artist.name,
+            "picture": self.picture,
+            "gernres": self.genres
         }
