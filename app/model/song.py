@@ -7,15 +7,17 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property,
 from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, event
 from typing import List, Optional
 from app import db
-from ..services import MBAPI
 
 class Song(Base):
     __tablename__ = "song"
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    mbid: Mapped[str] = mapped_column(unique=True)
-    name: Mapped[str] = mapped_column(String(50))
+    dzid: Mapped[int] = mapped_column(unique=True)
+    name: Mapped[str] = mapped_column(String(100))
     length: Mapped[int]
+    song_position: Mapped[int]
+    picture: Mapped[str]
+    preview: Mapped[str]
     avg_rating = column_property(
         select(func.avg(Rating.score)).where(Rating.song_id == id).correlate_except(Rating).scalar_subquery()
     )
@@ -57,6 +59,11 @@ class Song(Base):
                 if not obj.artist:
                     raise ValueError(f"Song with id:{obj.id}. Must have an artist!")
     
+    @property
+    def cover_art(self):
+        return self.album.cover_art_url if self.album else None
+
+
     @classmethod
     def get_song_by_id(cls, song_id):
         stmt = select(cls).where(cls.id==song_id)
@@ -76,7 +83,7 @@ class Song(Base):
         return result
     
     @classmethod
-    def write_songs_with_artists(cls, song_data, artist_data):
+    def write_songs_with_artists(cls, song_data, artist_data, album_data):
         result: list[Song] = []
         artists = Artist.write_artist(artist_data)
 
