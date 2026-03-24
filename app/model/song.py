@@ -1,18 +1,20 @@
 from .base import Base
 from .rating import Rating #!!!
 from .artist import Artist
+from .album import Album
 from .associations.playlist_song_association import playlist_song_association
 from .associations.artist_song_association import artist_song_association
 from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, Session
-from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, event
+from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, event, BigInteger
 from typing import List, Optional
 from app import db
+from ..services import DEEZNUTSAPI
 
 class Song(Base):
     __tablename__ = "song"
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    dzid: Mapped[int] = mapped_column(unique=True)
+    dzid: Mapped[int] = mapped_column(BigInteger, unique=True)
     name: Mapped[str] = mapped_column(String(100))
     length: Mapped[int]
     song_position: Mapped[int]
@@ -59,11 +61,6 @@ class Song(Base):
                 if not obj.artist:
                     raise ValueError(f"Song with id:{obj.id}. Must have an artist!")
     
-    @property
-    def cover_art(self):
-        return self.album.cover_art_url if self.album else None
-
-
     @classmethod
     def get_song_by_id(cls, song_id):
         stmt = select(cls).where(cls.id==song_id)
@@ -75,39 +72,46 @@ class Song(Base):
         stmt = select(cls).options(joinedload(cls.artist)).where(cls.name.ilike(f"%{query}%")).limit(10)
         result = db.session.scalars(stmt).unique().all()
         if not result:
-            songs, artists = MBAPI.get_song_by_name_with_artists(query)
+            songs, albums, artists = DEEZNUTSAPI.get_song_by_name(query=query) 
             if not songs:
-                return False
-            result = Song.write_songs_with_artists(songs,artists)
+                return []
+            result = Song.write_songs_with_artists_and_albums(song_data=songs, artist_data=artists, album_data=albums)
             return result
         return result
     
     @classmethod
-    def write_songs_with_artists(cls, song_data, artist_data, album_data):
+    def write_songs_with_artists_and_albums(cls, song_data, artist_data, album_data):
         result: list[Song] = []
         artists = Artist.write_artist(artist_data)
-
+        albums = Album.write_albums(album_data=album_data, artist_list=artists)
         for item in song_data:
-            print(f"DEBUG: Processing SONG item -> {item}")
-            mbid = item['mbid']
         
-            # existing_artist = db.session.execute(
-            #     select(cls).filter_by(mbid=mbid)
-            # ).scalar_one_or_none()
+            existing_song = db.session.execute(
+                select(cls).filter_by(dzid=item.get('dzid'))
+            ).scalar_one_or_none()
             
-            # if existing_artist:
-            #     result.append(existing_artist)
-            #     continue
-            
+            if existing_song:
+                result.append(existing_song)
+                continue
+
+            song_album_id = None
+            for album in albums:
+                if item.get("album_dzid") == album.dzid:
+                    song_album_id = album.id
+
+
             new_song = Song(
-                name=item.get('name'),
-                mbid=mbid,
-                length=item.get('length'),
-                #album_id=tre dopisat shob she album davalo
+                name = item.get('name'),
+                dzid = item.get('dzid'),
+                length = item.get('length'),
+                song_position = item.get('song_position'),
+                picture = item.get('picture'),
+                preview = item.get('preview'),
+                album_id = song_album_id,
             )
             artist = None
             for art in artists:
-                if art.mbid==item.get('artist_mbid'):
+                if art.dzid == item.get('artist_dzid'):
                     artist = art
             new_song.artist.append(artist)
             
@@ -122,8 +126,14 @@ class Song(Base):
     def to_dict(self):
         return {
             "id": self.id,
+            "dzid": self.dzid,
             "name": self.name,
             "length": self.length,
+            "song_position": self.song_position,
+            "picture": self.picture,
+            "preview": self.preview,
             "artist_name": self.artist[0].name,
-            #dopisat self.album, handling None + yak minat search_for_song_by_query
+            "artist_id": self.artist[0].id,
+            "album_name": self.album.name if self.album else None,
+            "album_id": self.album.id if self.album else None
         }
