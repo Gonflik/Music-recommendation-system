@@ -13,15 +13,14 @@ def search():
         return jsonify({"message": "Query term is not provided or is invalid!"}), 400
     
     artists = Artist.search_for_artist_by_query(query)
-    if not artists:
-        return jsonify({"error":"Artist not found!"}), 404
-    
+    songs = Song.search_for_song_by_query(query)
+    albums = Album.search_for_album_by_query(query)
 
     
     raw_result = {
-        "Artists": [artist.to_dict() for artist in artists],
-        #"Songs": [song.to_dict() for song in songs],
-        #"Albums": Album.search_for_album_by_query(query),
+        "Artists": [artist.to_dict() for artist in artists] if artists else artists,
+        "Songs": [song.to_dict() for song in songs] if songs else songs,
+        "Albums": [album.to_dict() for album in albums] if albums else albums,
         #"Playlists": Playlist.search_for_playlist_by_query(query),
     }
     
