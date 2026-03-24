@@ -1,28 +1,34 @@
 from .base import Base
-from .song import Song
 from .rating import Rating
+from .artist import Artist
+from .genre import Genre
+from .associations.album_genre_association import album_genre_association
 from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload
-from sqlalchemy import String, ForeignKey, func, select, CheckConstraint
+from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, BigInteger
 from typing import List
 from app import db
+from ..services import DEEZNUTSAPI
 
 class Album(Base):
     __tablename__ = "album"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    dzid: Mapped[int]
+    dzid: Mapped[int] = mapped_column(BigInteger, unique=True)
     name: Mapped[str] = mapped_column(String(200))
     length: Mapped[int]
     #release_date: Mapped[int]
     picture: Mapped[str]
-    #genres: Mapped[List[Genres]] 
-    
+
     avg_rating: Mapped[float] = column_property(
         select(func.avg(Rating.score)).where(Rating.song_id == id).correlate_except(Rating).scalar_subquery()
     )
     
     artist_id: Mapped[int] = mapped_column(ForeignKey("artist.id"))
 
+    genres: Mapped[List["Genre"]] = relationship(
+        secondary=album_genre_association,
+        back_populates="albums"
+    ) 
     artist: Mapped["Artist"] = relationship(back_populates="albums")
     songs: Mapped[List["Song"]] = relationship(back_populates="album")
     ratings: Mapped[List["Rating"]] = relationship(back_populates="album")
@@ -31,6 +37,40 @@ class Album(Base):
     __table_args__ = (
         CheckConstraint("LENGTH(name) > 0", name="ck_album_name_length"),
     )
+
+    @classmethod
+    def write_albums(cls, album_data, artist_list):
+        result: list[Album] = []
+        for item in album_data:
+            existing_album = db.session.execute(
+                select(cls).filter_by(dzid=item.get('dzid'))
+            ).scalar_one_or_none()
+
+            if existing_album:
+                result.append(existing_album)
+                continue
+
+
+            album_artist_id = None
+            for art in artist_list:
+                if item.get("artist_dzid") == art.dzid:
+                    album_artist_id = art.id
+
+            album_genre = Genre.write_genre(genre_data=item.get('genres'))         
+
+            new_album = Album(
+                name = item.get('name'),
+                dzid = item.get('dzid'),
+                length = item.get('length'),
+                picture = item.get('picture'),
+                artist_id = album_artist_id,
+            )
+            new_album.genres.extend(album_genre)
+            result.append(new_album)
+            db.session.add(new_album)
+            db.session.flush()
+        db.session.commit()
+        return result
 
     @validates('name')
     def validate_name(self, key, name):
@@ -52,8 +92,17 @@ class Album(Base):
     
     @classmethod
     def search_for_album_by_query(cls, query):
-        stmt = select(cls).options(joinedload(cls.artist)).where(cls.name.ilike(f"%{query}%")).limit(10)
+        stmt = select(cls).where(
+            cls.name.ilike(f"%{query}%"),
+        ).limit(10) #injection REVIEW
         result = db.session.scalars(stmt).all()
+        if not result:
+            albums, artists = DEEZNUTSAPI.get_album_by_name(query=query)
+            if not albums:
+                return []
+            artist_list = Artist.write_artist(artists)
+            result = Album.write_albums(albums, artist_list)
+            return result
         return result
     
     def to_dict(self):
@@ -63,5 +112,7 @@ class Album(Base):
             "name": self.name,
             "length": self.length,
             "picture": self.picture,
-            "gernres": self.genres
+            "genres": [genre.to_dict() for genre in self.genres],
+            "artist_name": self.artist.name,
+            "artist_id": self.artist.id
         }
