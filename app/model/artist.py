@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates, reconstructor
-from sqlalchemy import String, CheckConstraint, select, cast, or_
+from sqlalchemy import String, CheckConstraint, select, cast, or_, BigInteger
 from typing import List, Optional
 from .base import Base
 from .associations.artist_song_association import artist_song_association
@@ -10,7 +10,7 @@ class Artist(Base):
     __tablename__ = "artist"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    dzid: Mapped[int] = mapped_column(unique=True)
+    dzid: Mapped[int] = mapped_column(BigInteger, unique=True)
     name: Mapped[str] = mapped_column(String(100))
     picture: Mapped[str]
     
@@ -33,7 +33,7 @@ class Artist(Base):
         if not result:
             artists = DEEZNUTSAPI.get_artist_by_name(query=query)
             if not artists:
-                return False
+                return []
             result = Artist.write_artist(artists)
             return result
         return result
@@ -47,7 +47,15 @@ class Artist(Base):
     @classmethod
     def write_artist(cls, artist_data):
         result: list[Artist] = []
-        for item in artist_data:            
+        for item in artist_data:
+            existing_artist = db.session.execute(
+                select(cls).filter_by(dzid=item.get('dzid'))
+            ).scalar_one_or_none()
+
+            if existing_artist:
+                result.append(existing_artist) 
+                continue
+
             new_artist = Artist(
                 name=item.get('name'),
                 dzid=item.get('dzid'),
