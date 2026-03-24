@@ -6,6 +6,8 @@ from .playlist import Playlist
 from .rating import Rating
 from .tolisten import ToListen
 from .user import User
+from .genre import Genre
 from .TokenBlocklist import TokenBlocklist
+from .associations.album_genre_association import album_genre_association
 from .associations.artist_song_association import artist_song_association
 from .associations.playlist_song_association import playlist_song_association

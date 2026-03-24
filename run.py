@@ -1,6 +1,6 @@
 from app import create_app, db
 from dotenv import load_dotenv
-from app.model import Album, Artist, Song, ToListen, User
+from app.model import Album, Artist, Song, ToListen, User, Genre
 
 load_dotenv()
 

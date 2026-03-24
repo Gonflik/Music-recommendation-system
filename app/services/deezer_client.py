@@ -9,7 +9,7 @@ class DEEZNUTSAPI:
             formatted_artists = DEEZNUTSAPI._format_artist(artists_data=artists)
             return formatted_artists
 
-    def get_song_by_name(query: str):
+    def get_song_by_name(query: str) -> tuple[list[dict], list[dict], list[dict]]:
         with deezer.Client() as client:
             songs = client.search(query=query)[:5]
             result_songs, result_albums, result_artists = DEEZNUTSAPI._format_song_with_its_artist_and_album(client=client, song_data=songs)
@@ -123,19 +123,19 @@ class DEEZNUTSAPI:
         return mapped_albums
     
     def map_artists_of_albums(albums: list["albums"]):
-        mapped_albums = []
+        mapped_artists = []
         artist_id_cache = []
         for album in albums:
             artist_id = album.artist.id
             if artist_id in artist_id_cache:
                 continue
             artist_id_cache.append(artist_id)
-            mapped_albums.append({
+            mapped_artists.append({
                 "name": album.artist.name,
                 "dzid": artist_id,
                 "picture": album.artist.picture,
             })
-        return mapped_albums
+        return mapped_artists
 
 
 
@@ -161,7 +161,7 @@ class DEEZNUTSAPI:
 
 
 
-# albums, artists = DEEZNUTSAPI.get_album_by_name(query="The bends")
+# albums, artists = DEEZNUTSAPI.get_album_by_name(query="In rainbows")
 # print('--------_--------ALBUMS----------------------')
 # for i in albums:
 #     print(i)
