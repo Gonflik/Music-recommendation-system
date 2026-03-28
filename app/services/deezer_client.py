@@ -39,7 +39,7 @@ class DEEZNUTSAPI:
         for song in song_data:
             formatted_songs.append({
                 "name": song.title,
-                "dzid": song.id,
+                "dzid": song.id,   
                 "length": song.duration,
                 "song_position": song.track_position,
                 "picture": song.album.cover,
@@ -100,25 +100,27 @@ class DEEZNUTSAPI:
         mapped_albums = []
         album_cache = {}
         for song in songs:
-            album_id =  song.album.id
+            album_id = song.album.id
             if album_id in album_cache:
                 continue
+            
+            album = client.get_album(album_id)
+            album_cache[album_id] = album
 
-            album_cache[album_id] = client.get_album(album_id)
             genres = []
-            for genre in album_cache[album_id].genres:
+            for genre in album.genres:
                 genres.append({
                     "name": genre.name,
                     "dzid": genre.id
                 })
             mapped_albums.append({
-                "name": song.album.title,
-                "dzid": album_id,
-                "length": song.album.duration,
-                "picture": song.album.cover,
+                "name": album.title,
+                "dzid": album.id,
+                "length": album.duration,
+                "picture": album.cover,
                 "genres": genres,
-                "artist_name": album_cache[album_id].artist.name,
-                "artist_dzid": album_cache[album_id].artist.id,
+                "artist_name": album.artist.name,
+                "artist_dzid": album.artist.id,
             })
         return mapped_albums
     
