@@ -43,6 +43,12 @@ class Artist(Base):
         stmt = select(cls).where(cls.id==artist_id)
         result = db.session.scalar(stmt)
         return result
+    
+    @classmethod
+    def get_artist_by_dzid(cls, artist_dzid):
+        stmt = select(cls).where(cls.dzid==artist_dzid)
+        result = db.session.scalar(stmt)
+        return result
 
     @classmethod
     def write_artist(cls, artist_data):

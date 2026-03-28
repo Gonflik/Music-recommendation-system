@@ -18,9 +18,9 @@ class Album(Base):
     length: Mapped[int]
     #release_date: Mapped[int]
     picture: Mapped[str]
-
+    
     avg_rating: Mapped[float] = column_property(
-        select(func.avg(Rating.score)).where(Rating.song_id == id).correlate_except(Rating).scalar_subquery()
+        select(func.avg(Rating.score)).where(Rating.album_id == id).correlate_except(Rating).scalar_subquery()
     )
     
     artist_id: Mapped[int] = mapped_column(ForeignKey("artist.id"))
@@ -84,6 +84,12 @@ class Album(Base):
         album = db.session.scalar(stmt)
         return album
     
+    @classmethod
+    def get_album_by_dzid(cls, album_dzid):
+        stmt = select(cls).where(cls.dzid==album_dzid)
+        result = db.session.scalar(stmt)
+        return result
+
     @classmethod
     def get_album_by_name(cls, name):
         stmt = select(cls).where(cls.name.ilike(name))
