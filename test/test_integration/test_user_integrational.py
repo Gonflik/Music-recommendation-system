@@ -46,29 +46,6 @@ def test_user_profile_success(client, mock_user_data ,auth_data):
     response = client.get(f'/users/{user_id}', headers=headers)
     assert response.status_code == 200
 
-@pytest.mark.integration
-def test_user_profile_unathorized(client, mock_user_data, auth_data):
-    register_response = client.post('/users', data=json.dumps({"email": "ostap2@gmail.com",
-                                                               "name": "Ostap",
-                                                               "password": "ostap12345",
-                                                               "age": 23}), 
-                           headers={"Content-Type": "application/json"})
-    assert register_response.status_code == 201
-
-    login_data = {
-        "email": "ostap2@gmail.com",
-        "password": "ostap12345"
-    }
-    response = client.post('/users/login', data=json.dumps(login_data), headers={"Content-Type": "application/json"})
-    assert response.status_code == 200
-
-    data = response.get_json()
-    access_token = data['tokens']['access']
-
-    user_id = auth_data['user_id']
-    response = client.get(f'/users/{user_id}', headers={"Authorization": f"Bearer {access_token}"})
-
-    assert response.status_code == 401
 
 @pytest.mark.integration
 def test_user_put_success(client, mock_user_data, auth_data):

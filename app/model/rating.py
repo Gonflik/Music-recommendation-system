@@ -17,7 +17,7 @@ class Rating(Base):
     album_id: Mapped[int | None] = mapped_column(ForeignKey("album.id"))
     song_id: Mapped[int | None] = mapped_column(ForeignKey("song.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-
+    
     album: Mapped["Album"] = relationship(back_populates="ratings")
     song: Mapped["Song"] = relationship(back_populates="ratings")
     user: Mapped["User"] = relationship(back_populates="ratings")
@@ -52,8 +52,28 @@ class Rating(Base):
         return result
     
     @classmethod
-    def get_all_ratings_album_artist(cls, smthg, smthg1):
-        pass
+    def get_all_ratings_by_album_id(cls, album_id):
+        from .song import Song
+        from .album import Album
+        from .artist import Artist
+        stmt = select(cls).where(cls.album_id==album_id).options(
+            joinedload(cls.song).load_only(Song.id,Song.name,Song.length).selectinload(Song.artist).load_only(Artist.name),
+            joinedload(cls.album).load_only(Album.id,Album.name,Album.length).joinedload(Album.artist).load_only(Artist.name),
+        )
+        result = db.session.scalars(stmt).unique().all()
+        return result
+    
+    @classmethod
+    def get_all_ratings_by_song_id(cls, song_id):
+        from .song import Song
+        from .album import Album
+        from .artist import Artist
+        stmt = select(cls).where(cls.song_id==song_id).options(
+            joinedload(cls.song).load_only(Song.id,Song.name,Song.length).selectinload(Song.artist).load_only(Artist.name),
+            joinedload(cls.album).load_only(Album.id,Album.name,Album.length).joinedload(Album.artist).load_only(Artist.name),
+        )
+        result = db.session.scalars(stmt).unique().all()
+        return result
 
     @classmethod
     def get_one_rating_by_id(cls, rating_id):

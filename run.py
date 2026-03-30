@@ -1,14 +1,14 @@
 from app import create_app, db
 from dotenv import load_dotenv
-from app.model import Album, Artist, Song, ToListen, User
+from app.model import Album, Artist, Song, ToListen, User, Genre
 
 load_dotenv()
 
 app = create_app()
 
-with app.app_context():
-    artist = Artist(name="John Pork")
-    album = Album(name="John Pork is Calling", artist_id=1)
+"""with app.app_context():
+    artist = Artist(name="John Pork", mbid="sosihuy")
+    album = Album(name="John Pork is Calling", artist_id=artist.id)
     song = Song(name="Pork",length=123,genre="Piggy-rock", album_id=1)
     song.artist.append(artist)
     album2 = Album(name="John Pork is dead...", artist_id=1)
@@ -24,4 +24,4 @@ with app.app_context():
     #db.session.add(user)
     #db.session.add(tolisten)
     db.session.add_all(add_all)
-    db.session.commit()
+    db.session.commit()"""

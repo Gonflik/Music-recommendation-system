@@ -25,6 +25,25 @@ def rating_get_all_for_user(user_id):
 def rating_get_all():
     pass
 
+@rating_bp.get('/artists/<int:artist_id>/songs/<int:song_id>/ratings')
+@jwt_required()
+def rating_get_all_for_songs(artist_id, song_id):
+    all_ratings = Rating.get_all_ratings_by_song_id(song_id)
+
+    results = {"Ratings": [rating.to_dict() for rating in all_ratings]}
+
+    return jsonify(results), 200
+
+@rating_bp.get('/artists/<int:artist_id>/albums/<int:album_id>/ratings')
+@jwt_required()
+def rating_get_all_for_album(artist_id, album_id):
+    
+    all_ratings = Rating.get_all_ratings_by_album_id(album_id)
+
+    results = {"Ratings": [rating.to_dict() for rating in all_ratings]}
+
+    return jsonify(results), 200
+
 @rating_bp.post('/artists/<int:artist_id>/albums/<int:album_id>/ratings')
 @jwt_required()
 def rating_create_for_album(artist_id, album_id):

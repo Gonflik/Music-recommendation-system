@@ -1,41 +1,37 @@
 import pytest
 import json
+from unittest.mock import patch, MagicMock
 from app.model import Base
 from app import create_app, db
 from .factories import all_factories
+from types import SimpleNamespace
 
 
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def app():
     params = {
-        'SQLALCHEMY_ENGINES': {"default": "postgresql+psycopg://testdranik:dranik322@localhost:5432/testdb"},
+        "SQLALCHEMY_ENGINES": {
+            "default": "postgresql+psycopg://testdranik:dranik322@localhost:5432/testdb"
+        },
         "SECRET_KEY": "asdadadadadadada",
-        "JWT_SECRET_KEY": "123sahfu2748fu1273y18y1diuhfhwd19828e19eu198e1298ssuf1283"
+        "JWT_SECRET_KEY": "123sahfu2748fu1273y18y1diuhfhwd19828e19eu198e1298ssuf1283",
     }
-    _app = create_app(test_config=params)
-    with _app.app_context():
-        yield _app
+    app = create_app(test_config=params)
+    yield app
 
 @pytest.fixture(scope="function")
-def engine():
-    return db.engine
+def engine(app):
+    with app.app_context():
+        yield db.engine
     
 @pytest.fixture(scope="function")
 def client(app):
     return app.test_client()
 
 @pytest.fixture(scope="session", autouse=True)
-def setup_db():
-    app = create_app(
-        test_config={
-            "SQLALCHEMY_ENGINES": {
-                "default": "postgresql+psycopg://testdranik:dranik322@localhost:5432/testdb"
-            }
-        }
-    )
-
+def setup_db(app):
     with app.app_context():
         Base.metadata.create_all(db.engine)
         yield
@@ -89,3 +85,108 @@ def auth_data(client, mock_user_data):
         "user_id": user_id,
         "refresh": refresh_token
     }
+
+@pytest.fixture
+def mock_deezer_client():
+    with patch('app.services.deezer_client.deezer.Client') as mock_class:
+        fake_instance = MagicMock()
+        mock_class.return_value.__enter__.return_value = fake_instance
+        yield fake_instance
+
+@pytest.fixture
+def mock_deezer_api_response_artist(mock_deezer_client):
+    fake_artist = MagicMock()
+
+    fake_artist.id = 27
+    fake_artist.name = "mass of the fermenting dregs"
+    fake_artist.picture = "https://api.deezer.com/artist/27/image"
+
+    mock_deezer_client.search_artists.return_value = [fake_artist]
+
+    return fake_artist
+
+@pytest.fixture
+def mock_deezer_api_response_artist_empty(mock_deezer_client):
+    fake_artist = []
+
+    mock_deezer_client.search_artists.return_value = fake_artist
+    return fake_artist
+
+@pytest.fixture
+def mock_deezer_api_response_song(mock_deezer_client):
+    fake_song = SimpleNamespace(
+        title="Luv (sic) pt5",
+        id = 10293,
+        duration = 350,
+        track_position = 6,
+        preview = "https://bebrabebra.music",
+        artist=SimpleNamespace(
+            name="Nujabes",
+            id = 12317,
+            picture = "https://fakeartistpicture.music.pictures",
+        ),
+        album=SimpleNamespace(
+            title="Luv (sic) hexalogy",
+            id = 6246234,
+            cover = "https://picturealbumshne.music",
+        )
+    )
+    
+    fake_album = SimpleNamespace(
+        title="Luv (sic) hexalogy",
+        id = 6246234,
+        duration = 3200,
+        cover = "https://picturealbumshne.music",
+        genres = [
+            SimpleNamespace(name="Hip-hop", id=77)
+        ],
+        artist = SimpleNamespace(
+            name = "Nujabes",
+            id = 12317
+        ),
+    )
+
+    mock_deezer_client.search.return_value = [fake_song]
+    mock_deezer_client.get_album.return_value = fake_album
+
+    return {
+        "song": fake_song,
+        "album": fake_album,
+    }
+
+@pytest.fixture
+def mock_deezer_api_response_song_empty(mock_deezer_client):
+    fake_song = []
+
+    mock_deezer_client.search.return_value = fake_song
+
+    return fake_song
+
+@pytest.fixture
+def mock_deezer_api_response_album(mock_deezer_client):
+    fake_album = SimpleNamespace(
+        title = "If",
+        id = 30212,
+        duration = 2700,
+        cover = "https://somepicturetypeshit.music.com",
+        genres = [
+            SimpleNamespace(name="Synth-punk", id=67)
+        ],
+        artist = SimpleNamespace(
+            name = "Mindless Self Indulgence",
+            id = 6767,
+            picture = "https://msipictureshnee.com.music.com",
+        ),
+    )
+
+    mock_deezer_client.search_albums.return_value = [fake_album]
+
+    return fake_album
+
+@pytest.fixture
+def mock_deezer_api_response_album_empty(mock_deezer_client):
+    fake_album = []
+
+    mock_deezer_client.search_albums.return_value = fake_album
+
+    return fake_album

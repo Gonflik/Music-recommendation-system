@@ -1,5 +1,5 @@
 import factory
-from app.model import Artist, Album, Song, Playlist, ToListen, Rating, User
+from app.model import Artist, Album, Song, Playlist, ToListen, Rating, User, Genre
 from app.model.user import UserRole, GenderEnum
 
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -22,8 +22,8 @@ class ArtistFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session = None
 
     name = factory.Faker("name")
-    description = factory.Faker("sentence")
-    age = factory.Faker("random_int", min=6, max=120)
+    picture = factory.Faker("sentence")
+    dzid = factory.Faker("random_int", min=1000, max=10000)
 
 class SongFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -32,10 +32,20 @@ class SongFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     name = factory.Faker("sentence", nb_words=3)
     length = factory.Faker("random_int", min=40, max=360)
-    genre = factory.Faker("random_element", elements=["Rock", "Techno", "Metal", "Jazz", "Lo-Fi", "Indie", "Hip-hop"])
+    dzid = factory.Faker("random_int", min=1000, max=10000)
+    song_position = factory.Faker("random_int",min=1, max=26)
+    picture = factory.Faker("sentence")
+    preview = factory.Faker("sentence")
     
     album = None
     
+class GenreFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Genre
+        sqlalchemy_session = None
+    
+    name = name = factory.Faker("sentence", nb_words=3)
+    dzid = factory.Faker("random_int", min=0, max=200)
 
 class AlbumFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -43,9 +53,14 @@ class AlbumFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session = None
 
     name = factory.Faker("sentence", nb_words=3)
-    
+    dzid = factory.Faker("random_int", min=1000, max=10000)
+    length = factory.Faker("random_int", min=600, max=5000)
+    picture = factory.Faker("sentence")
+    genres = factory.List([factory.SubFactory(GenreFactory)])
+
     artist = factory.SubFactory(ArtistFactory)
     songs = []
+
 
 class ToListenFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -96,5 +111,6 @@ all_factories = [
     SongFactory,
     ToListenFactory,
     PlaylistFactory,
-    RatingFactory
+    RatingFactory,
+    GenreFactory
 ]
