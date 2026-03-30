@@ -87,35 +87,6 @@ def auth_data(client, mock_user_data):
     }
 
 @pytest.fixture
-def mock_api_artist_data():
-    return 
-
-
-# @pytest.fixture
-# def mock_api_response(mock_api_artist_data):
-#     with patch('app.services.deezer') as mock_search:
-#         mock_search.return_value = {
-#             'artist-list': [
-#                 {
-#                     "name": "Bobrik",
-#                     "foreign_name": "Бобрік",
-#                     "disambiguation": "Aspiring artist",
-#                     "id": "12314jdnfjf-asndadn12-12ksdfks",
-#                     "alias-list": [{"alias": "bobr"}]
-#                 } 
-#             ]
-#         }
-#         yield mock_search
-
-# @pytest.fixture
-# def mock_api_response_none(mock_api_artist_data):
-#     with patch('app.services.musicbrainz_client.musicbrainzngs.search_artists') as mock_search:
-#         mock_search.return_value = {
-#             "artist-list": None
-#         }
-#         yield mock_search
-
-@pytest.fixture
 def mock_deezer_client():
     with patch('app.services.deezer_client.deezer.Client') as mock_class:
         fake_instance = MagicMock()
@@ -182,3 +153,40 @@ def mock_deezer_api_response_song(mock_deezer_client):
         "song": fake_song,
         "album": fake_album,
     }
+
+@pytest.fixture
+def mock_deezer_api_response_song_empty(mock_deezer_client):
+    fake_song = []
+
+    mock_deezer_client.search.return_value = fake_song
+
+    return fake_song
+
+@pytest.fixture
+def mock_deezer_api_response_album(mock_deezer_client):
+    fake_album = SimpleNamespace(
+        title = "If",
+        id = 30212,
+        duration = 2700,
+        cover = "https://somepicturetypeshit.music.com",
+        genres = [
+            SimpleNamespace(name="Synth-punk", id=67)
+        ],
+        artist = SimpleNamespace(
+            name = "Mindless Self Indulgence",
+            id = 6767,
+            picture = "https://msipictureshnee.com.music.com",
+        ),
+    )
+
+    mock_deezer_client.search_albums.return_value = [fake_album]
+
+    return fake_album
+
+@pytest.fixture
+def mock_deezer_api_response_album_empty(mock_deezer_client):
+    fake_album = []
+
+    mock_deezer_client.search_albums.return_value = fake_album
+
+    return fake_album

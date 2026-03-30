@@ -118,7 +118,7 @@ class Album(Base):
             "name": self.name,
             "length": self.length,
             "picture": self.picture,
-            "genres": [genre.to_dict() for genre in self.genres],
+            "genres": [genre.to_dict() for genre in self.genres] if self.genres else [],
             "artist_name": self.artist.name,
             "artist_id": self.artist.id
         }

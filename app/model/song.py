@@ -83,7 +83,9 @@ class Song(Base):
     def write_songs_with_artists_and_albums(cls, song_data, artist_data, album_data):
         result: list[Song] = []
         artists = Artist.write_artist(artist_data)
+        print("ARTISTS WRITTEN:", [artist.to_dict() for artist in artists])
         albums = Album.write_albums(album_data=album_data, artist_list=artists)
+        print("ALBUMS WRITTEN:", [album.to_dict() for album in albums])
         for item in song_data:
         
             existing_song = db.session.execute(
@@ -99,7 +101,7 @@ class Song(Base):
                 if item.get("album_dzid") == album.dzid:
                     song_album_id = album.id
 
-
+            
             new_song = Song(
                 name = item.get('name'),
                 dzid = item.get('dzid'),
@@ -113,6 +115,10 @@ class Song(Base):
             for art in artists:
                 if art.dzid == item.get('artist_dzid'):
                     artist = art
+
+            print("MATCH SONG ITEM:", item)
+            print("MATCHED ARTIST:", artist)
+            print("MATCHED ALBUM ID:", song_album_id)
             new_song.artist.append(artist)
             
             result.append(new_song)

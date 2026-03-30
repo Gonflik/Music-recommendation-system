@@ -1,12 +1,16 @@
 from flask import Blueprint, jsonify, request
 from app.model import ToListen, Album, User
+from flask_jwt_extended import jwt_required
+
 
 tolisten_bp = Blueprint('tolisten', __name__)
 
-@tolisten_bp.get('/tolisten/<int:user_id>')
+@tolisten_bp.get('/users/<int:user_id>/tolisten')
+@jwt_required()
 def tolisten_get_by_user_id(user_id):
     entries = ToListen.get_all_tolisten_join_album_join_artist_by_user_id(user_id)
     results = []
+    total_length = 0
     for entry in entries:
         results.append({
             "id": entry.id,
@@ -15,43 +19,38 @@ def tolisten_get_by_user_id(user_id):
                 "id": entry.album.id,
                 "name": entry.album.name,
                 "length": entry.album.length,
+                "picture": entry.album.picture,
                 "avg_rating": entry.album.avg_rating or 0,
-                "artist_name": entry.album.artist.name
+                "artist_name": entry.album.artist.name,
+                "artist_id": entry.album.artist.id
             }
         })
-    return jsonify(results)
+        total_length += entry.album.length
+    return jsonify({"ToListen": results,
+                    "Total ToListen length": f"{total_length/60} sec"
+    })
 
-@tolisten_bp.post('/tolisten/<int:user_id>')
+@tolisten_bp.post('/users/<int:user_id>/tolisten')
+@jwt_required()
 def tolisten_add_album_to_user(user_id):
+
     data = request.get_json()
-    user = User.get_user_by_id(user_id)
-    if not user:
-        return jsonify({"message" : "User not found!"}), 404
     
     note = data.get('note', '')
     album_id = data.get('album_id')
-    album_name = data.get('album_name')
-    album = None
 
-    if album_id:
-        album = Album.get_album_by_id(album_id)
-    elif album_name:
-        album = Album.get_album_by_name(album_name)
+    album = Album.get_album_by_id(album_id)
     
     if not album:
         return jsonify({"message": "Album not found!"}), 404
     
-    tolisten_entry = ToListen(note=note, user_id=user_id, album_id=album.id)
+    tolisten_entry = ToListen(note=note, user_id=user_id, album_id=album_id)
     tolisten_entry.save()
     return jsonify({"message": "Album succesfully added!"}), 201
     
-@tolisten_bp.delete('/tolisten/<int:user_id>')
+@tolisten_bp.delete('/users/<int:user_id>/tolisten')
 def tolisten_delete_album(user_id):
     data = request.get_json()
-
-    user = User.get_user_by_id(user_id)
-    if not user:
-        return jsonify({"message" : "User not found!"}), 404
     
     tolisten_entry_id = data.get('tolisten_id')
     if not tolisten_entry_id:
@@ -66,7 +65,7 @@ def tolisten_delete_album(user_id):
     return jsonify({"message": "No ToListen entry with such id!"}), 404
     
 
-@tolisten_bp.put('/tolisten/<int:user_id>')
+@tolisten_bp.put('/users/<int:user_id>/tolisten')
 def tolisten_update_note(user_id):
     data = request.get_json()
 
