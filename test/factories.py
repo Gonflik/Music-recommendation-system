@@ -1,5 +1,5 @@
 import factory
-from app.model import Artist, Album, Song, Playlist, ToListen, Rating, User, Genre
+from app.model import Artist, Album, Song, ToListen, Rating, User, Genre
 from app.model.user import UserRole, GenderEnum
 
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -85,32 +85,12 @@ class RatingFactory(factory.alchemy.SQLAlchemyModelFactory):
     album = factory.SubFactory(AlbumFactory)
     song = None
 
-class PlaylistFactory(factory.alchemy.SQLAlchemyModelFactory):
-    class Meta:
-        model = Playlist
-        sqlalchemy_session = None
-
-    name = factory.Faker("sentence", nb_words=3)
-    description = factory.Faker("sentence")
-
-    @factory.post_generation
-    def songs(self, create, extracted, **kwargs):
-        if not create:
-            return
-        if extracted:
-            for song in extracted:
-                self.songs.append(song)
-        else:
-            self.songs.append(SongFactory())
-            self.songs.append(SongFactory())
-
 all_factories = [
     UserFactory,
     ArtistFactory,
     AlbumFactory,
     SongFactory,
     ToListenFactory,
-    PlaylistFactory,
     RatingFactory,
     GenreFactory
 ]

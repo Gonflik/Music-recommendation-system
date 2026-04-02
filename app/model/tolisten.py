@@ -1,9 +1,15 @@
+import enum
 from .base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship, joinedload, validates
-from sqlalchemy import String, ForeignKey, select, UniqueConstraint, CheckConstraint
+from sqlalchemy import String, ForeignKey, select, UniqueConstraint, CheckConstraint, Enum
 from typing import List, Optional
 from app.extensions import db
 from app.model import Album
+
+class ObjectType(enum.Enum):
+    SONG = "Song"
+    ALBUM = "Album"
+    ARTIST = "Artist"
 
 class ToListen(Base):
     __tablename__ = "tolisten"
@@ -12,6 +18,7 @@ class ToListen(Base):
     note: Mapped[str] = mapped_column(String(300))
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     album_id: Mapped[int] = mapped_column(ForeignKey("album.id"))
+    #object_type: Mapped[ObjectType] = mapped_column()
 
     user: Mapped["User"] = relationship(back_populates="tolisten")
     album: Mapped["Album"] = relationship(back_populates="tolisten")

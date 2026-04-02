@@ -1,6 +1,6 @@
 import pytest
 from app.model import User
-from ..factories import SongFactory, AlbumFactory, PlaylistFactory, RatingFactory, ArtistFactory, UserFactory
+from ..factories import SongFactory, AlbumFactory, RatingFactory, ArtistFactory, UserFactory
 
 def test_create_valid_song(db_session):
     artist = ArtistFactory()
@@ -12,7 +12,6 @@ def test_song_relationship(db_session):
     artist = ArtistFactory()
     album = AlbumFactory(artist=artist)
     song = SongFactory(artist=[artist], album=album)
-    playlist = PlaylistFactory(songs=[song])
     rating = RatingFactory(song=song,user=UserFactory())
     db_session.flush()
     assert len(song.artist) > 0 

@@ -2,7 +2,6 @@ from .base import Base
 from .rating import Rating #!!!
 from .artist import Artist
 from .album import Album
-from .associations.playlist_song_association import playlist_song_association
 from .associations.artist_song_association import artist_song_association
 from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, Session
 from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, event, BigInteger
@@ -31,10 +30,6 @@ class Song(Base):
         back_populates="songs",
     )
     album: Mapped["Album"] = relationship(back_populates="songs")
-    playlists: Mapped[List["Playlist"]] = relationship(
-        secondary=playlist_song_association,
-        back_populates="songs",
-    )
     ratings: Mapped[List["Rating"]] = relationship(back_populates="song")
 
     __table_args__ = (
