@@ -1,9 +1,10 @@
 from .base import Base
+
 from app import db
 from.associations.album_genre_association import album_genre_association
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload, joinedload
 from typing import List
-from sqlalchemy import select 
+from sqlalchemy import select
 
 
 class Genre(Base):
@@ -38,6 +39,26 @@ class Genre(Base):
             result.append(new_genre)
         return result
 
+    def get_by_id(genre_id):
+        from .album import Album
+        from .artist import Artist
+        stmt = select(Genre).where(Genre.id==genre_id).options(selectinload(Genre.albums).joinedload(Album.artist))
+        genres = db.session.scalar(stmt)
+        return genres
+
+    def get_all(per_page: int, page: int):
+        from .album import Album
+        from .artist import Artist
+        if page <= 0 or per_page <= 0:
+            return None
+        stmt = select(Genre).options(selectinload(Genre.albums).joinedload(Album.artist)).limit(per_page).offset((page-1) * per_page)
+        genres = db.session.scalars(stmt).unique().all()
+        return genres
 
     def to_dict(self):
-        return {"name": self.name, "dzid": self.dzid, "id": self.id}
+        return {
+            "name": self.name,
+            "id": self.id,
+            "dzid": self.dzid,
+            "Albums": [alb.id for alb in self.albums],
+        }

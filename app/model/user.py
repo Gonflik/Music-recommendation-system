@@ -144,7 +144,7 @@ class User(Base):
         hash_digest = hash_object.hexdigest()
         return hash_digest
     
-    #register/login and such logic
+
     @classmethod
     def register(cls, data):
         if User.get_user_by_email(data.get('email')) is not None:

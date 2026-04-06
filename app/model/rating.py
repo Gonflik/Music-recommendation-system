@@ -2,7 +2,6 @@ from sqlalchemy.orm import (Mapped, mapped_column, relationship,
                             validates, joinedload, load_only, 
                             selectinload, reconstructor)
 from sqlalchemy import String, Text, CheckConstraint, ForeignKey, select, UniqueConstraint
-from flask import jsonify
 from typing import List, Optional
 from app import db
 from .base import Base

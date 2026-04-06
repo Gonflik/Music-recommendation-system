@@ -63,11 +63,11 @@ class Song(Base):
         return song
 
     @classmethod
-    def search_for_song_by_query(cls, query):
-        stmt = select(cls).options(joinedload(cls.artist)).where(cls.name.ilike(f"%{query}%")).limit(10)
+    def search_for_song_by_query(cls, query, per_page: int, page: int):
+        stmt = select(cls).options(joinedload(cls.artist)).where(cls.name.ilike(f"%{query}%")).limit(per_page).offset((page-1) * per_page)
         result = db.session.scalars(stmt).unique().all()
         if not result:
-            songs, albums, artists = DEEZNUTSAPI.get_song_by_name(query=query) 
+            songs, albums, artists = DEEZNUTSAPI.get_song_by_name(query=query, per_page=per_page, page=page) 
             if not songs:
                 return []
             result = Song.write_songs_with_artists_and_albums(song_data=songs, artist_data=artists, album_data=albums)
