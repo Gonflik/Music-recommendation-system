@@ -2,26 +2,33 @@ import deezer
 from deezer import Genre
 
 class DEEZNUTSAPI:
+    
     "--------------------------------------WHAT WILL BE CALLED---------------------------------------------------------------------"
-    def get_artist_by_name(query: str):
+    def get_artist_by_name(query: str, per_page: int, page: int) -> list[dict]:
         with deezer.Client() as client:
-            artists = client.search_artists(query=query)[:5]
-            formatted_artists = DEEZNUTSAPI._format_artist(artists_data=artists)
+            artists = client.search_artists(query=query)
+            paginated_artists = DEEZNUTSAPI.paginate(artists, per_page, page) #additional calls may be issued here!
+            formatted_artists = DEEZNUTSAPI._format_artist(artists_data=paginated_artists)
             return formatted_artists
 
-    def get_song_by_name(query: str) -> tuple[list[dict], list[dict], list[dict]]:
+    def get_song_by_name(query: str, per_page: int, page: int) -> tuple[list[dict], list[dict], list[dict]]:
         with deezer.Client() as client:
-            songs = client.search(query=query)[:5]
-            result_songs, result_albums, result_artists = DEEZNUTSAPI._format_song_with_its_artist_and_album(client=client, song_data=songs)
+            songs = client.search(query=query)
+            paginated_songs = DEEZNUTSAPI.paginate(songs, per_page, page)
+            result_songs, result_albums, result_artists = DEEZNUTSAPI._format_song_with_its_artist_and_album(client=client, song_data=paginated_songs)
             return result_songs, result_albums, result_artists
         
-    def get_album_by_name(query: str):
+    def get_album_by_name(query: str, per_page: int, page: int) -> tuple[list[dict], list[dict]]:
         with deezer.Client() as client:
-            albums = client.search_albums(query=query)[:5]
-            result_albums, result_artists = DEEZNUTSAPI._format_album_with_its_artist(album_data=albums)
+            albums = client.search_albums(query=query)
+            paginated_albums = DEEZNUTSAPI.paginate(albums, per_page, page)
+            result_albums, result_artists = DEEZNUTSAPI._format_album_with_its_artist(album_data=paginated_albums)
             return result_albums, result_artists
     "----------------------------------------------------------------------------------------------------------------------------"
-
+    def paginate(items, per_page: int, page: int):
+        start = (page - 1) * per_page
+        end = start + per_page
+        return items[start:end]
 
     def _format_artist(artists_data):
         result = []
@@ -71,6 +78,7 @@ class DEEZNUTSAPI:
                 "length": album.duration,
                 "picture": album.cover,
                 "genres": genres,
+                "ghost_songs_count": album.nb_tracks,
                 "artist_name": album.artist.name,
                 "artist_dzid": album.artist.id,
             })
@@ -119,6 +127,7 @@ class DEEZNUTSAPI:
                 "length": album.duration,
                 "picture": album.cover,
                 "genres": genres,
+                "ghost_songs_count": album.nb_tracks,
                 "artist_name": album.artist.name,
                 "artist_dzid": album.artist.id,
             })
