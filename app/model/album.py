@@ -3,7 +3,7 @@ from .rating import Rating
 from .artist import Artist
 from .genre import Genre
 from .associations.album_genre_association import album_genre_association
-from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, selectinload
 from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, BigInteger
 from typing import List
 from app import db
@@ -18,7 +18,7 @@ class Album(Base):
     length: Mapped[int]
     #release_date: Mapped[int]
     picture: Mapped[str]
-    
+    ghost_songs_count: Mapped[int]
     avg_rating: Mapped[float] = column_property(
         select(func.avg(Rating.score)).where(Rating.album_id == id).correlate_except(Rating).scalar_subquery()
     )
@@ -63,6 +63,7 @@ class Album(Base):
                 dzid = item.get('dzid'),
                 length = item.get('length'),
                 picture = item.get('picture'),
+                ghost_songs_count = item.get('ghost_songs_count'),
                 artist_id = album_artist_id,
             )
             new_album.genres.extend(album_genre)
@@ -96,14 +97,21 @@ class Album(Base):
         album = db.session.scalar(stmt)
         return album
     
+    def get_all(per_page: int, page: int):
+        if page <= 0 or per_page <= 0:
+            return None
+        stmt = select(Genre).options(selectinload(Genre.albums).joinedload(Album.artist)).limit(per_page).offset((page-1) * per_page)
+        genres = db.session.scalars(stmt).all()
+        return genres
+    
     @classmethod
-    def search_for_album_by_query(cls, query):
+    def search_for_album_by_query(cls, query, per_page: int, page: int):
         stmt = select(cls).where(
             cls.name.ilike(f"%{query}%"),
-        ).limit(10) #injection REVIEW
+        ).limit(per_page).offset((page-1) * per_page) #injection REVIEW
         result = db.session.scalars(stmt).all()
         if not result:
-            albums, artists = DEEZNUTSAPI.get_album_by_name(query=query)
+            albums, artists = DEEZNUTSAPI.get_album_by_name(query=query, per_page=per_page, page=page)
             if not albums:
                 return []
             artist_list = Artist.write_artist(artists)
