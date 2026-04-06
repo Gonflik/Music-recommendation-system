@@ -25,13 +25,13 @@ class Artist(Base):
     )
 
     @classmethod
-    def search_for_artist_by_query(cls, query):
+    def search_for_artist_by_query(cls, query, per_page: int, page: int):
         stmt = select(cls).where(or_(
             cls.name.ilike(f"%{query}%"),
-        )).limit(10) #injection REVIEW
-        result = db.session.scalars(stmt).all()
+        )).limit(per_page).offset((page-1) * per_page)
+        result = db.session.scalars(stmt).unique().all()
         if not result:
-            artists = DEEZNUTSAPI.get_artist_by_name(query=query)
+            artists = DEEZNUTSAPI.get_artist_by_name(query=query, per_page=per_page, page=page)
             if not artists:
                 return []
             result = Artist.write_artist(artists)
@@ -48,6 +48,12 @@ class Artist(Base):
     def get_artist_by_dzid(cls, artist_dzid):
         stmt = select(cls).where(cls.dzid==artist_dzid)
         result = db.session.scalar(stmt)
+        return result
+    
+    @classmethod
+    def get_all(cls, page: int, per_page: int):
+        stmt = select(cls).limit(per_page).offset((page-1) * per_page)
+        result = db.session.scalars(stmt).all()
         return result
 
     @classmethod
