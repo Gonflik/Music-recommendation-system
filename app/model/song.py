@@ -78,9 +78,7 @@ class Song(Base):
     def write_songs_with_artists_and_albums(cls, song_data, artist_data, album_data):
         result: list[Song] = []
         artists = Artist.write_artist(artist_data)
-        print("ARTISTS WRITTEN:", [artist.to_dict() for artist in artists])
         albums = Album.write_albums(album_data=album_data, artist_list=artists)
-        print("ALBUMS WRITTEN:", [album.to_dict() for album in albums])
         for item in song_data:
         
             existing_song = db.session.execute(

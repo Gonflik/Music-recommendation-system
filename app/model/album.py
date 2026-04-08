@@ -80,10 +80,24 @@ class Album(Base):
         return name
     
     @classmethod
-    def get_album_by_id(cls, album_id):
-        stmt = select(cls).where(cls.id==album_id)
+    def get_album_by_id(cls, album_id, load_songs: bool):
+        from .song import Song
+        stmt = select(cls).where(cls.id==album_id).options(selectinload(cls.songs))
         album = db.session.scalar(stmt)
+        if not load_songs:
+            return album
+        
+        if album:
+            if len(album.songs) < album.ghost_songs_count:
+                songs, albums, artists = DEEZNUTSAPI.load_songs_for_album(album.dzid, album.to_dict())
+                Song.write_songs_with_artists_and_albums(songs, artists, albums)
+        
+                stmt = select(cls).where(cls.id==album_id).options(selectinload(cls.songs))
+                album = db.session.scalar(stmt)
+                return album
         return album
+        
+            
     
     @classmethod
     def get_album_by_dzid(cls, album_dzid):
@@ -101,7 +115,7 @@ class Album(Base):
         if page <= 0 or per_page <= 0:
             return None
         stmt = select(Genre).options(selectinload(Genre.albums).joinedload(Album.artist)).limit(per_page).offset((page-1) * per_page)
-        genres = db.session.scalars(stmt).all()
+        genres = db.session.scalars(stmt).unique().all()
         return genres
     
     @classmethod
@@ -127,6 +141,8 @@ class Album(Base):
             "length": self.length,
             "picture": self.picture,
             "genres": [genre.to_dict() for genre in self.genres] if self.genres else [],
+            "ghost_songs_count": self.ghost_songs_count,
             "artist_name": self.artist.name,
             "artist_id": self.artist.id
         }
+    
