@@ -15,7 +15,7 @@ class DEEZNUTSAPI:
         with deezer.Client() as client:
             songs = client.search(query=query)
             paginated_songs = DEEZNUTSAPI.paginate(songs, per_page, page)
-            result_songs, result_albums, result_artists = DEEZNUTSAPI._format_song_with_its_artist_and_album(client=client, song_data=paginated_songs, no_album=False)
+            result_songs, result_albums, result_artists = DEEZNUTSAPI._format_song_with_its_artist_and_album(client=client, song_data=paginated_songs)
             return result_songs, result_albums, result_artists
         
     def get_album_by_name(query: str, per_page: int, page: int) -> tuple[list[dict], list[dict]]:
@@ -30,7 +30,7 @@ class DEEZNUTSAPI:
             album = client.get_album(album_id=album_dzid)
             song_objects = album.get_tracks()
             results_songs, results_albums, results_artists = DEEZNUTSAPI._format_song_with_its_artist_and_album(client=client, song_data=song_objects, no_album=album_dict)
-            return results_songs, [results_albums], results_artists 
+            return results_songs, [results_albums], results_artists
 
     "----------------------------------------------------------------------------------------------------------------------------"
     def paginate(items, per_page: int, page: int):
@@ -49,14 +49,14 @@ class DEEZNUTSAPI:
         return result
     
     #search + return mapped data
-    def _format_song_with_its_artist_and_album(client, song_data, no_album: dict):
+    def _format_song_with_its_artist_and_album(client, song_data, no_album: dict = {}):
         formatted_songs = []
         for song in song_data:
             formatted_songs.append({
                 "name": song.title,
                 "dzid": song.id,   
                 "length": song.duration,
-                "song_position": song.track_position,
+                "song_position": song.track_position,                                           
                 "picture": song.album.cover,
                 "preview": song.preview,
                 "artist_name": song.artist.name,

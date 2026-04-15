@@ -80,7 +80,7 @@ class Album(Base):
         return name
     
     @classmethod
-    def get_album_by_id(cls, album_id, load_songs: bool):
+    def get_album_by_id(cls, album_id, load_songs: bool): 
         from .song import Song
         stmt = select(cls).where(cls.id==album_id).options(selectinload(cls.songs))
         album = db.session.scalar(stmt)

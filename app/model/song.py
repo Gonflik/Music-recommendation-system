@@ -3,7 +3,7 @@ from .rating import Rating #!!!
 from .artist import Artist
 from .album import Album
 from .associations.artist_song_association import artist_song_association
-from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, Session
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, Session, selectinload
 from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, event, BigInteger
 from typing import List, Optional
 from app import db
@@ -64,7 +64,7 @@ class Song(Base):
 
     @classmethod
     def search_for_song_by_query(cls, query, per_page: int, page: int):
-        stmt = select(cls).options(joinedload(cls.artist)).where(cls.name.ilike(f"%{query}%")).limit(per_page).offset((page-1) * per_page)
+        stmt = select(cls).options(joinedload(cls.artist), selectinload(cls.album)).where(cls.name.ilike(f"%{query}%")).limit(per_page).offset((page-1) * per_page)
         result = db.session.scalars(stmt).unique().all()
         if not result:
             songs, albums, artists = DEEZNUTSAPI.get_song_by_name(query=query, per_page=per_page, page=page) 
