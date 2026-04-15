@@ -56,6 +56,7 @@ class AlbumFactory(factory.alchemy.SQLAlchemyModelFactory):
     dzid = factory.Faker("random_int", min=1000, max=10000)
     length = factory.Faker("random_int", min=600, max=5000)
     picture = factory.Faker("sentence")
+    ghost_songs_count = factory.Faker("random_int", min=0, max=40)
     genres = factory.List([factory.SubFactory(GenreFactory)])
 
     artist = factory.SubFactory(ArtistFactory)

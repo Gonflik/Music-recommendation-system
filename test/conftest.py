@@ -13,7 +13,7 @@ from types import SimpleNamespace
 def app():
     params = {
         "SQLALCHEMY_ENGINES": {
-            "default": "postgresql+psycopg://testdranik:dranik322@localhost:5432/testdb"
+            "default": "postgresql+psycopg://testdranik:dranik322@localhost:5432/for_pytest"
         },
         "SECRET_KEY": "asdadadadadadada",
         "JWT_SECRET_KEY": "123sahfu2748fu1273y18y1diuhfhwd19828e19eu198e1298ssuf1283",
@@ -137,6 +137,9 @@ def mock_deezer_api_response_song(mock_deezer_client):
         id = 6246234,
         duration = 3200,
         cover = "https://picturealbumshne.music",
+        track_position = 67,
+        nb_tracks = 52,
+        preview = "https://preview.music",
         genres = [
             SimpleNamespace(name="Hip-hop", id=77)
         ],
@@ -169,6 +172,7 @@ def mock_deezer_api_response_album(mock_deezer_client):
         id = 30212,
         duration = 2700,
         cover = "https://somepicturetypeshit.music.com",
+        nb_tracks = 6767,
         genres = [
             SimpleNamespace(name="Synth-punk", id=67)
         ],
@@ -184,9 +188,92 @@ def mock_deezer_api_response_album(mock_deezer_client):
     return fake_album
 
 @pytest.fixture
+def mock_deezer_api_response_album_nujabes(mock_deezer_client):
+    fake_album = SimpleNamespace(
+        title = "Luv (sic) hexalogy",
+        id = 6246234,
+        duration = 2700,
+        cover = "https://somepicturetypeshit.music.com",
+        nb_tracks = 6767,
+        genres = [
+            SimpleNamespace(name="Hip-hop", id=52)
+        ],
+        artist = SimpleNamespace(
+            name = "Nujabes",
+            id = 12317,
+            picture = "https://msipictureshnee.com.music.com",
+        ),
+    )
+
+    mock_deezer_client.search_albums.return_value = [fake_album]
+
+    return fake_album
+
+@pytest.fixture
 def mock_deezer_api_response_album_empty(mock_deezer_client):
     fake_album = []
 
     mock_deezer_client.search_albums.return_value = fake_album
 
     return fake_album
+
+@pytest.fixture
+def mock_deezer_api_response_album_get_tracks(mock_deezer_client):
+    fake_song = SimpleNamespace(
+        title="Luv (sic) pt5",
+        id = 10293,
+        duration = 350,
+        track_position = 6,
+        preview = "https://bebrabebra.music",
+        artist=SimpleNamespace(
+            name="Nujabes",
+            id = 12317,
+            picture = "https://fakeartistpicture.music.pictures",
+        ),
+        album=SimpleNamespace(
+            title="Luv (sic) hexalogy",
+            id = 6246234,
+            cover = "https://picturealbumshne.music",
+        )
+    )
+
+    fake_song_2 = SimpleNamespace(
+        title="Luv (sic) pt6",
+        id = 10295,
+        duration = 332,
+        track_position = 7,
+        preview = "https://bebrabebra.music",
+        artist=SimpleNamespace(
+            name="Nujabes",
+            id = 12317,
+            picture = "https://fakeartistpicture.music.pictures",
+        ),
+        album=SimpleNamespace(
+            title="Luv (sic) hexalogy",
+            id = 6246234,
+            cover = "https://picturealbumshne.music",
+        )
+    )
+    fake_album = SimpleNamespace(
+        title = "Luv (sic) hexalogy",
+        id = 6246234,
+        duration = 2700,
+        cover = "https://somepicturetypeshit.music.com",
+        nb_tracks = 6767,
+        genres = [
+            SimpleNamespace(name="Hip-hop", id=52)
+        ],
+        artist = SimpleNamespace(
+            name = "Nujabes",
+            id = 12317,
+            picture = "https://msipictureshnee.com.music.com",
+        ),
+    )
+    def get_tracks():
+        return [fake_song, fake_song_2]
+    
+    fake_album.get_tracks = get_tracks
+    mock_deezer_client.get_album.return_value = fake_album
+    
+
+    return fake_song, fake_song_2
