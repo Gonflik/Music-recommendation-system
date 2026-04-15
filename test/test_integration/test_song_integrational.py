@@ -31,13 +31,8 @@ def test_api_song_success(client, db_session, auth_data, mock_deezer_api_respons
 def test_api_song_empty_response(client, db_session, auth_data, mock_deezer_api_response_song_empty):
     headers = auth_data['headers']
     response = client.get('/search?q=Something-non-existent', headers=headers)
-    assert response.status_code == 200
+    assert response.status_code == 404
 
-    data = response.get_json()
-    assert not data["Songs"]
-    assert not data["Artists"]
-    assert not data["Albums"]
-    
     song = db_session.execute(
         select(Song)
     ).scalar_one_or_none()

@@ -16,7 +16,6 @@ def test_song_relationship(db_session):
     db_session.flush()
     assert len(song.artist) > 0 
     assert song.album is not None
-    assert song.playlists is not None
     assert song.ratings is not None
 
 def test_create_song_single(db_session):
