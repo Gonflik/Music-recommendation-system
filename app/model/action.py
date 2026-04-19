@@ -13,7 +13,7 @@ class ActionName(str, enum.Enum):
     ARTIST_SHOW = "artist_show" #non-existent yet
     ADD_TO_LISTEN = "add_to_listen" #make polymorph
     RATE_ALBUM = "rate_album"
-    #RATE SONG coming...
+    RATE_SONG = "rate_song"
 
 class ReferenceClassName(str, enum.Enum):
     ALBUM = "album"

@@ -1,6 +1,6 @@
 import enum
 from .base import Base
-from sqlalchemy.orm import Mapped, mapped_column, relationship, joinedload, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, joinedload, validates, selectinload
 from sqlalchemy import String, ForeignKey, select, UniqueConstraint, CheckConstraint, Enum
 from typing import List, Optional
 from app.extensions import db
@@ -28,8 +28,8 @@ class ToListen(Base):
     )
     #can be optimized, load_only() for artist,album
     @classmethod
-    def get_all_tolisten_join_album_join_artist_by_user_id(cls,user_id): 
-        stmt = select(cls).where(cls.user_id== user_id).options(joinedload(cls.album).joinedload(Album.artist))
+    def get_all_join_album_join_artist_by_user_id(cls,user_id): 
+        stmt = select(cls).where(cls.user_id== user_id).options(joinedload(cls.album).joinedload(Album.artist), joinedload(cls.album).selectinload(Album.genres))
         result = db.session.scalars(stmt).all()
         return result
     
