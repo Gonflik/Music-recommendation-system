@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
-from app.model import ToListen, Album, User
-from flask_jwt_extended import jwt_required
+from app.model import ToListen, Album, User, Action
+from app.model.action import ActionName, ReferenceClassName
+from flask_jwt_extended import jwt_required, current_user
 
 
 tolisten_bp = Blueprint('tolisten', __name__)
@@ -8,22 +9,14 @@ tolisten_bp = Blueprint('tolisten', __name__)
 @tolisten_bp.get('/users/<int:user_id>/tolisten')
 @jwt_required()
 def tolisten_get_by_user_id(user_id):
-    entries = ToListen.get_all_tolisten_join_album_join_artist_by_user_id(user_id)
+    entries = ToListen.get_all_join_album_join_artist_by_user_id(user_id)
     results = []
     total_length = 0
     for entry in entries:
         results.append({
             "id": entry.id,
             "note": entry.note,
-            "album": {
-                "id": entry.album.id,
-                "name": entry.album.name,
-                "length": entry.album.length,
-                "picture": entry.album.picture,
-                "avg_rating": entry.album.avg_rating or 0,
-                "artist_name": entry.album.artist.name,
-                "artist_id": entry.album.artist.id
-            }
+            "Album": entry.album.to_dict()
         })
         total_length += entry.album.length
     return jsonify({"ToListen": results,
@@ -33,7 +26,6 @@ def tolisten_get_by_user_id(user_id):
 @tolisten_bp.post('/users/<int:user_id>/tolisten')
 @jwt_required()
 def tolisten_add_album_to_user(user_id):
-
     data = request.get_json()
     
     note = data.get('note', '')
@@ -44,8 +36,12 @@ def tolisten_add_album_to_user(user_id):
     if not album:
         return jsonify({"message": "Album not found!"}), 404
     
+
     tolisten_entry = ToListen(note=note, user_id=user_id, album_id=album_id)
     tolisten_entry.save()
+
+    Action.create_or_increment(name=ActionName.ADD_TO_LISTEN ,user_id=current_user.id, reference_id=album_id, reference_name=ReferenceClassName.ALBUM)
+
     return jsonify({"message": "Album succesfully added!"}), 201
     
 @tolisten_bp.delete('/users/<int:user_id>/tolisten')

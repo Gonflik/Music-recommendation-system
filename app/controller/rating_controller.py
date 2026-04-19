@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, current_user, get_jwt_identity
-from app.model import Rating, User, Album, Song
+from app.model import Rating, User, Album, Song, Action, Artist
+from app.model.action import ReferenceClassName, ActionName
 
 rating_bp = Blueprint('rating', __name__)
 
@@ -28,6 +29,14 @@ def rating_get_all():
 @rating_bp.get('/artists/<int:artist_id>/songs/<int:song_id>/ratings')
 @jwt_required()
 def rating_get_all_for_songs(artist_id, song_id):
+    existing_artist = Artist.get_artist_by_id(artist_id)
+    if not existing_artist:
+        return jsonify({"error": "Artist not found!"}), 404
+    
+    existing_song = Song.get_song_by_id(song_id)
+    if not existing_song:
+        return jsonify({"error": "Song not found!"}), 404
+    
     all_ratings = Rating.get_all_ratings_by_song_id(song_id)
 
     results = {"Ratings": [rating.to_dict() for rating in all_ratings]}
@@ -37,7 +46,14 @@ def rating_get_all_for_songs(artist_id, song_id):
 @rating_bp.get('/artists/<int:artist_id>/albums/<int:album_id>/ratings')
 @jwt_required()
 def rating_get_all_for_album(artist_id, album_id):
+    existing_artist = Artist.get_artist_by_id(artist_id)
+    if not existing_artist:
+        return jsonify({"error": "Artist not found!"}), 404
     
+    existing_album = Album.get_album_by_id(album_id)
+    if not existing_album:
+        return jsonify({"error": "Album not found!"}), 404
+
     all_ratings = Rating.get_all_ratings_by_album_id(album_id)
 
     results = {"Ratings": [rating.to_dict() for rating in all_ratings]}
@@ -57,13 +73,26 @@ def rating_create_for_album(artist_id, album_id):
     if not data.get('score'):
         return jsonify({"error": "Missing required fields!", "missing": "score", }), 400
     
+    existing_artist = Artist.get_artist_by_id(artist_id)
+    if not existing_artist:
+        return jsonify({"error": "Artist not found!"}), 404
+    
+    existing_album = Album.get_album_by_id(album_id)
+    if not existing_album:
+        return jsonify({"error": "Album not found!"}), 404
+
+
     user_id = current_user.id
     rating, errors = Rating.rate_album(artist_id, album_id, data, user_id)
+
+    Action.create_or_increment(name=ActionName.RATE_ALBUM ,user_id=current_user.id, reference_id=album_id, reference_name=ReferenceClassName.ALBUM)
 
     if errors:
         status_code = errors.pop('code', 400)
         return jsonify(errors), status_code
     
+
+
     return jsonify({"message" : "Rating created",
                     "id": rating.id}), 201
 
@@ -80,6 +109,14 @@ def rating_create_for_song(artist_id, song_id):
     if not data.get('score'):
         return jsonify({"error": "Missing required fields!", "missing": "score", }), 400
     
+    existing_artist = Artist.get_artist_by_id(artist_id)
+    if not existing_artist:
+        return jsonify({"error": "Artist not found!"}), 404
+    
+    existing_song = Song.get_song_by_id(song_id)
+    if not existing_song:
+        return jsonify({"error": "Song not found!"}), 404
+
     user_id = current_user.id
     rating, errors = Rating.rate_song(artist_id, song_id, data, user_id)
 
@@ -87,6 +124,8 @@ def rating_create_for_song(artist_id, song_id):
         status_code = errors.pop('code', 400)
         return jsonify(errors), status_code
     
+    Action.create_or_increment(name=ActionName.RATE_SONG ,user_id=current_user.id, reference_id=song_id, reference_name=ReferenceClassName.SONG)
+
     return jsonify({"message" : "Rating created",
                     "id": rating.id}), 201
 

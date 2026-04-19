@@ -56,8 +56,9 @@ class Rating(Base):
         from .album import Album
         from .artist import Artist
         stmt = select(cls).where(cls.album_id==album_id).options(
-            joinedload(cls.song).load_only(Song.id,Song.name,Song.length).selectinload(Song.artist).load_only(Artist.name),
-            joinedload(cls.album).load_only(Album.id,Album.name,Album.length).joinedload(Album.artist).load_only(Artist.name),
+            joinedload(cls.song).selectinload(Song.artist),
+            joinedload(cls.album).joinedload(Album.artist),
+            joinedload(cls.album).selectinload(Album.genres),
         )
         result = db.session.scalars(stmt).unique().all()
         return result
@@ -68,8 +69,8 @@ class Rating(Base):
         from .album import Album
         from .artist import Artist
         stmt = select(cls).where(cls.song_id==song_id).options(
-            joinedload(cls.song).load_only(Song.id,Song.name,Song.length).selectinload(Song.artist).load_only(Artist.name),
-            joinedload(cls.album).load_only(Album.id,Album.name,Album.length).joinedload(Album.artist).load_only(Artist.name),
+            joinedload(cls.song).selectinload(Song.artist),
+            joinedload(cls.album).joinedload(Album.artist),
         )
         result = db.session.scalars(stmt).unique().all()
         return result
@@ -80,8 +81,9 @@ class Rating(Base):
         from .album import Album
         from .artist import Artist
         stmt = select(cls).where(cls.id==rating_id).options(
-            joinedload(cls.song).load_only(Song.id,Song.name,Song.length).selectinload(Song.artist).load_only(Artist.name),
-            joinedload(cls.album).load_only(Album.id,Album.name,Album.length).joinedload(Album.artist).load_only(Artist.name),
+            joinedload(cls.song).selectinload(Song.artist),
+            joinedload(cls.album).joinedload(Album.artist),
+            joinedload(cls.album).selectinload(Album.genres),
         )
         result = db.session.scalar(stmt)
         return result
@@ -138,12 +140,7 @@ class Rating(Base):
             "id": self.id,
             "score": self.score,
             "description": f"{self.description[:100]}..." if self.description else "5 centimeters per second",
-            f"{target.__class__.__name__}": {
-                "id": target.id,
-                "name": target.name,
-                "length": target.length, #btw for every length of album a query is run
-                "artist_name": artist_names
-            },
+            f"{target.__class__.__name__}": target.to_dict(),
         }
 
     @classmethod
