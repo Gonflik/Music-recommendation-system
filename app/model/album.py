@@ -1,10 +1,11 @@
-from .base import Base
-from .rating import Rating
-from .artist import Artist
-from .genre import Genre
+import datetime
+from app.model.base import Base
+from app.model.rating import Rating
+from app.model.genre import Genre
+from app.model.artist import Artist
 from .associations.album_genre_association import album_genre_association
 from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, selectinload
-from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, BigInteger
+from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, BigInteger, Date
 from typing import List
 from app import db
 from ..services import DEEZNUTSAPI
@@ -16,7 +17,8 @@ class Album(Base):
     dzid: Mapped[int] = mapped_column(BigInteger, unique=True)
     name: Mapped[str] = mapped_column(String(200))
     length: Mapped[int]
-    #release_date: Mapped[int]
+    release_date: Mapped[datetime.date] = mapped_column(Date())
+    release_type: Mapped[str]
     picture: Mapped[str]
     ghost_songs_count: Mapped[int]
     avg_rating: Mapped[float] = column_property(
@@ -64,6 +66,8 @@ class Album(Base):
                 length = item.get('length'),
                 picture = item.get('picture'),
                 ghost_songs_count = item.get('ghost_songs_count'),
+                release_date = item.get('release_date'),
+                release_type = item.get('release_type'),
                 artist_id = album_artist_id,
             )
             new_album.genres.extend(album_genre)
@@ -80,9 +84,9 @@ class Album(Base):
         return name
     
     @classmethod
-    def get_album_by_id(cls, album_id, load_songs: bool): 
+    def get_album_by_id(cls, album_id, load_songs: bool = False): 
         from .song import Song
-        stmt = select(cls).where(cls.id==album_id).options(selectinload(cls.songs))
+        stmt = select(cls).where(cls.id==album_id).options(selectinload(cls.songs), selectinload(cls.genres))
         album = db.session.scalar(stmt)
         if not load_songs:
             return album
