@@ -8,7 +8,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property,
 from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, BigInteger, Date
 from typing import List
 from app import db
-from ..services import DEEZNUTSAPI
 
 class Album(Base):
     __tablename__ = "album"
@@ -84,7 +83,8 @@ class Album(Base):
         return name
     
     @classmethod
-    def get_album_by_id(cls, album_id, load_songs: bool = False): 
+    def get_album_by_id(cls, album_id, load_songs: bool = False):
+        from ..services.deezer_client import DEEZNUTSAPI
         from .song import Song
         stmt = select(cls).where(cls.id==album_id).options(selectinload(cls.songs), selectinload(cls.genres))
         album = db.session.scalar(stmt)
@@ -124,6 +124,7 @@ class Album(Base):
     
     @classmethod
     def search_for_album_by_query(cls, query, per_page: int, page: int):
+        from ..services.deezer_client import DEEZNUTSAPI
         stmt = select(cls).where(
             cls.name.ilike(f"%{query}%"),
         ).limit(per_page).offset((page-1) * per_page) #injection REVIEW
@@ -146,6 +147,8 @@ class Album(Base):
             "picture": self.picture,
             "genres": [genre.to_dict() for genre in self.genres] if self.genres else [],
             "ghost_songs_count": self.ghost_songs_count,
+            "release_date": self.release_date,
+            "release_type": self.release_type,
             "artist_name": self.artist.name,
             "artist_id": self.artist.id
         }

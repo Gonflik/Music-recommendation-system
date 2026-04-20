@@ -4,7 +4,6 @@ from typing import List, Optional
 from .base import Base
 from .associations.artist_song_association import artist_song_association
 from app import db
-from ..services import DEEZNUTSAPI
 
 class Artist(Base):
     __tablename__ = "artist"
@@ -13,6 +12,7 @@ class Artist(Base):
     dzid: Mapped[int] = mapped_column(BigInteger, unique=True)
     name: Mapped[str] = mapped_column(String(100))
     picture: Mapped[str]
+    ghost_albums_count: Mapped[int]
     
     albums: Mapped[List["Album"]] = relationship(back_populates="artist")
     songs: Mapped[List["Song"]] = relationship(
@@ -23,9 +23,10 @@ class Artist(Base):
     __table_args__ = (
         CheckConstraint("LENGTH(name) > 0", name="ck_artist_name_length"),
     )
-
+    
     @classmethod
     def search_for_artist_by_query(cls, query, per_page: int, page: int):
+        from ..services.deezer_client import DEEZNUTSAPI
         stmt = select(cls).where(or_(
             cls.name.ilike(f"%{query}%"),
         )).limit(per_page).offset((page-1) * per_page)
@@ -39,10 +40,15 @@ class Artist(Base):
         return result
     
     @classmethod
-    def get_artist_by_id(cls, artist_id):
+    def get_artist_by_id(cls, artist_id, load_albums: bool = False):
         stmt = select(cls).where(cls.id==artist_id)
-        result = db.session.scalar(stmt)
-        return result
+        artist = db.session.scalar(stmt)
+        if not load_albums:
+            return artist
+        
+        if artist:
+            pass
+        return artist
     
     @classmethod
     def get_artist_by_dzid(cls, artist_dzid):
@@ -71,7 +77,8 @@ class Artist(Base):
             new_artist = Artist(
                 name=item.get('name'),
                 dzid=item.get('dzid'),
-                picture=item.get('picture')
+                picture=item.get('picture'),
+                ghost_albums_count=item.get('ghost_albums_count')
             )  
             result.append(new_artist)
             db.session.add(new_artist)
@@ -88,5 +95,6 @@ class Artist(Base):
             "id": self.id,
             "dzid": self.dzid,
             "name": self.name,
-            "picture": self.picture
+            "picture": self.picture,
+            "ghost_albums_count": self.ghost_albums_count,
         }
