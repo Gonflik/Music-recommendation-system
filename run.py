@@ -1,10 +1,16 @@
 from app import create_app, db
 from dotenv import load_dotenv
 from app.model import Album, Artist, Song, ToListen, User, Genre
+from app.services import PropagandaDranika
 
 load_dotenv()
 
 app = create_app()
+
+with app.app_context():
+    mappi = PropagandaDranika.get_recommendations(1)
+    for album in mappi:
+        print(album.to_dict())
 
 """with app.app_context():
     artist = Artist(name="John Pork", mbid="sosihuy")

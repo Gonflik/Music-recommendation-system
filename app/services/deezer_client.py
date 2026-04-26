@@ -31,7 +31,7 @@ class DEEZNUTSAPI:
             song_objects = album.get_tracks()
             results_songs, results_albums, results_artists = DEEZNUTSAPI._format_song_with_its_artist_and_album(client=client, song_data=song_objects, no_album=album_dict)
             return results_songs, [results_albums], results_artists
-
+   
     "----------------------------------------------------------------------------------------------------------------------------"
     def paginate(items, per_page: int, page: int):
         start = (page - 1) * per_page
@@ -45,6 +45,7 @@ class DEEZNUTSAPI:
                 "name": art.name,
                 "dzid": art.id,
                 "picture": art.picture,
+                "ghost_albums_count": art.nb_album,
             })
         return result
     
@@ -89,6 +90,8 @@ class DEEZNUTSAPI:
                 "picture": album.cover,
                 "genres": genres,
                 "ghost_songs_count": album.nb_tracks,
+                "release_date": album.release_date,
+                "release_type": album.record_type,
                 "artist_name": album.artist.name,
                 "artist_dzid": album.artist.id,
             })
@@ -111,6 +114,7 @@ class DEEZNUTSAPI:
                 "name": song.artist.name,
                 "dzid": artist_id,
                 "picture": song.artist.picture,
+                "ghost_albums_count": song.artist.nb_album
             })
         return mapped_artists
     
@@ -138,6 +142,8 @@ class DEEZNUTSAPI:
                 "picture": album.cover,
                 "genres": genres,
                 "ghost_songs_count": album.nb_tracks,
+                "release_date": album.release_date,
+                "release_type": album.record_type,
                 "artist_name": album.artist.name,
                 "artist_dzid": album.artist.id,
             })
@@ -155,6 +161,7 @@ class DEEZNUTSAPI:
                 "name": album.artist.name,
                 "dzid": artist_id,
                 "picture": album.artist.picture,
+                "ghost_albums_count": album.artist.nb_album,
             })
         return mapped_artists
 

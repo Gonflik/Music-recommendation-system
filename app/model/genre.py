@@ -55,10 +55,10 @@ class Genre(Base):
         genres = db.session.scalars(stmt).unique().all()
         return genres
 
+
     def to_dict(self):
         return {
             "name": self.name,
             "id": self.id,
             "dzid": self.dzid,
-            "Albums": [alb.id for alb in self.albums],
         }
