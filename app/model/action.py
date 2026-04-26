@@ -3,10 +3,10 @@ import datetime
 from app import db
 from sqlalchemy import Enum, DateTime, func, Integer, ForeignKey
 from .base import Base
-from app.model import Artist, Album, Song
 from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload, joinedload
 from typing import List
 from sqlalchemy import select
+
 
 class ActionName(str, enum.Enum):
     ALBUM_SHOW = "album_show"
@@ -41,10 +41,13 @@ class Action(Base):
 
     def get_target(self) -> object:
         if self.reference_name == "album":
+            from .album import Album
             return Album.get_album_by_id(self.reference_id)
         if self.reference_name == "artist":
+            from .artist import Artist
             return Artist.get_artist_by_id(self.reference_id)
         if self.reference_name == "song":
+            from .song import Song
             return Song.get_song_by_id(self.reference_id)
         
     @classmethod
@@ -60,7 +63,24 @@ class Action(Base):
         new_action.save()
 
         return "pepe"
+    
+    @classmethod
+    def get_all_for_user(cls, user_id: int):
+        stmt = select(cls).where(cls.user_id==user_id)
+        actions = db.session.scalars(stmt).all()
+        return actions
 
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "reference_name": self.reference_name,
+            "reference_id": self.reference_id,
+            "counter": self.counter,
+            "timestamp": self.timestamp,
+            "user_id": self.user_id,
+        }
