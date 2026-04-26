@@ -58,7 +58,10 @@ class Album(Base):
                     album_artist_id = art.id
 
             album_genre = Genre.write_genre(genre_data=item.get('genres'))         
-
+            print("ALBUM ITEM:", item)
+            print("ARTISTS:", [(a.id, a.dzid, a.name) for a in artist_list])
+            print("ALBUM ARTIST DZID:", item.get("artist_dzid"))
+            print("FOUND ARTIST ID:", album_artist_id)
             new_album = Album(
                 name = item.get('name'),
                 dzid = item.get('dzid'),
@@ -101,7 +104,10 @@ class Album(Base):
                 return album
         return album
         
-            
+    @classmethod
+    def get_by_genre_id(cls, genre_id: int, limit: int = 10):
+        stmt = select(cls).join(cls.genres).where(Genre.id==genre_id).options(selectinload(cls.genres)).limit(limit) 
+        return db.session.scalars(stmt).all()  
     
     @classmethod
     def get_album_by_dzid(cls, album_dzid):
