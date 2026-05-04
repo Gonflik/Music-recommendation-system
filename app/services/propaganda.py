@@ -16,7 +16,9 @@ class PropagandaDranika:
         ActionName.RATE_SONG: 10,
     }
 
-    def build_user_genre_map(user_id:int) -> dict:
+
+    def build_user_genre_map(user_id: int) -> dict:
+        from ..model.rating import Rating
         user_actions = Action.get_all_for_user(user_id)
         babagaga = [act.to_dict() for act in user_actions]
         for i in babagaga:
@@ -28,30 +30,56 @@ class PropagandaDranika:
             if not action_reference:
                 continue
 
-            weight = PropagandaDranika.ACTION_WEIGHTS[action.name] * action.counter #добавити decay, тобто 1 дає 100% score, dali 70% i t.d.
+            weight = PropagandaDranika.ACTION_WEIGHTS[action.name] * (0.5**(action.counter - 1)) #добавити decay, тобто 1 дає 100% score, dali 70% i t.d.
+            if action.name == ActionName.RATE_ALBUM:
+                rating_obj = Rating.get_by_album_user_id(action.reference_id, user_id)
+                if rating_obj.score <= 5:
+                    excluded_album_ids.append(action_reference.id)
+                    for g in action_reference.genres:
+                        user_genre_map[g.id] += ((rating_obj.score * 3.75) - 13.75)
+                else:
+                    excluded_album_ids.append(action_reference.id)
+                    for g in action_reference.genres:
+                        user_genre_map[g.id] += ((rating_obj.score * 2.25) - 7.5)
 
-            if action.reference_name == ReferenceClassName.ALBUM:
+            elif action.name == ActionName.RATE_SONG:
+                rating_obj = Rating.get_by_song_user_id(action.reference_id, user_id)
+                if rating_obj.score <= 5:
+                    excluded_album_ids.append(action_reference.album.id)
+                    for g in action_reference.album.genres:
+                        user_genre_map[g.id] += ((rating_obj.score * 3.75) - 13.75)
+                else:
+                    excluded_album_ids.append(action_reference.album.id)
+                    for g in action_reference.album.genres:
+                        user_genre_map[g.id] += ((rating_obj.score * 2.25) - 7.5)
+
+            elif action.reference_name == ReferenceClassName.ALBUM:
                 if action.name != ActionName.ALBUM_SHOW:
+                    excluded_album_ids.append(action_reference.id)
+                if action.name == ActionName.ALBUM_SHOW and action.counter >= 4:
                     excluded_album_ids.append(action_reference.id)
                 for g in action_reference.genres:
                     user_genre_map[g.id] += weight
 
-            if action.reference_name == ReferenceClassName.ARTIST:
+            elif action.reference_name == ReferenceClassName.ARTIST:
                 for album in action_reference.albums[:3]:
                     for g in album.genres:
                         user_genre_map[g.id] += weight
 
-            if action.reference_name == ReferenceClassName.SONG:
+            elif action.reference_name == ReferenceClassName.SONG:
                 excluded_album_ids.append(action_reference.album.id)
                 for g in action_reference.album.genres:
                     user_genre_map[g.id] += weight
 
         sorted_map = dict(sorted(user_genre_map.items(), key=operator.itemgetter(1), reverse=True)[:5]) #mb po inshomu
+        print("DEBUG -----------------------------------------------------------------------------------", sorted_map)
         for key,value in sorted_map.items():
             print(f"Genre: {key} - {value}")
         return sorted_map, excluded_album_ids
         
     def select_canditates(user_genre_map: dict):
+        
+
         candidates = []
         for key, value in user_genre_map.items():
             albums = Album.get_by_genre_id(key, limit=15)
