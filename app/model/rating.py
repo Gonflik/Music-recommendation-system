@@ -88,6 +88,20 @@ class Rating(Base):
         result = db.session.scalar(stmt)
         return result
 
+    @classmethod
+    def get_by_album_user_id(cls, album_id, user_id):
+        from .album import Album
+        stmt = select(cls).where(cls.album_id==album_id, cls.user_id==user_id).options(joinedload(cls.album).joinedload(Album.artist))
+        result = db.session.scalar(stmt)
+        return result
+
+    @classmethod
+    def get_by_song_user_id(cls, song_id, user_id):
+        from .song import Song
+        stmt = select(cls).where(cls.song_id==song_id, cls.user_id==user_id).options(joinedload(cls.song).joinedload(Song.artist))
+        result = db.session.scalar(stmt)
+        return result
+
     @validates('score')
     def validate_score(self, key, score):
         if score > 10 or score < 0:

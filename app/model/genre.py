@@ -20,7 +20,7 @@ class Genre(Base):
     )
 
     @classmethod
-    def write_genre(cls, genre_data) -> Genre:
+    def write_genre(cls, genre_data):
         result: list[Genre] = []
         for item in genre_data:
             genre_dzid = item.get('dzid')
