@@ -7,10 +7,10 @@ load_dotenv()
 
 app = create_app()
 
-with app.app_context():
-    mappi = PropagandaDranika.get_recommendations(1)
-    for album in mappi:
-        print(album.to_dict())
+
+app.run(host="0.0.0.0", port=5000)
+
+
 
 """with app.app_context():
     artist = Artist(name="John Pork", mbid="sosihuy")
