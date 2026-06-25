@@ -8,6 +8,8 @@ from .controller.tolisten_controller import tolisten_bp
 from .controller.rating_controller import rating_bp
 from .controller.search_controller import search_bp
 from .controller.album_controller import album_bp
+from .controller.explore_controller import explore_bp
+from .controller.artist_controller import artist_bp
 from flask_migrate import Migrate
 
 
@@ -23,13 +25,9 @@ def create_app(test_config=None):
     db.init_app(app)
     jwt.init_app(app)
     
-    app.register_blueprint(user_bp)
-    app.register_blueprint(tolisten_bp)
-    app.register_blueprint(rating_bp)
-    app.register_blueprint(search_bp)
-    app.register_blueprint(genre_bp)
-    app.register_blueprint(album_bp)
-
+    all_bp = [user_bp, tolisten_bp, rating_bp, search_bp, genre_bp, album_bp, explore_bp, artist_bp]
+    for bp in all_bp:
+        app.register_blueprint(bp)
 
     # if test_config:
     #     pass
