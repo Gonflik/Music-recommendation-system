@@ -3,7 +3,9 @@ from sqlalchemy import String, CheckConstraint, select, cast, or_, BigInteger
 from typing import List, Optional
 from .base import Base
 from .associations.artist_song_association import artist_song_association
+
 from app import db
+
 
 class Artist(Base):
     __tablename__ = "artist"
@@ -40,14 +42,11 @@ class Artist(Base):
         return result
     
     @classmethod
-    def get_artist_by_id(cls, artist_id, load_albums: bool = False):
+    def get_artist_by_id(cls, artist_id):
         stmt = select(cls).where(cls.id==artist_id)
         artist = db.session.scalar(stmt)
-        if not load_albums:
-            return artist
-        
-        if artist:
-            pass
+        if not artist:
+            return []
         return artist
     
     @classmethod
@@ -61,7 +60,27 @@ class Artist(Base):
         stmt = select(cls).limit(per_page).offset((page-1) * per_page)
         result = db.session.scalars(stmt).all()
         return result
+    #------------------------------------------------------------------------------------------------------------------------
+    def get_top_songs_deezer(self):
+        from .song import Song
+        from app.services.deezer_client import DEEZNUTSAPI
+        top_songs, albums, artists = DEEZNUTSAPI.load_top_artists_songs(self.dzid)
+        if not top_songs:
+            return []
+        
+        result = Song.write_songs_with_artists_and_albums(song_data=top_songs, artist_data=artists, album_data=albums)
+        return result
 
+    def get_all_albums_deezer(self):
+        from .album import Album
+        from app.services.deezer_client import DEEZNUTSAPI
+        albums, artists = DEEZNUTSAPI.load_all_artists_albums(self.dzid)
+        if not albums:
+            return []
+        artist_list = Artist.write_artist(artists)
+        result = Album.write_albums(albums, artist_list)
+        return result
+    #------------------------------------------------------------------------------------------------------------------------
     @classmethod
     def write_artist(cls, artist_data):
         result: list[Artist] = []

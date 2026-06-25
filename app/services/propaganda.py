@@ -1,4 +1,5 @@
 import operator
+from datetime import datetime
 from collections import defaultdict
 from app.model.action import Action
 from app.model.album import Album
@@ -36,6 +37,16 @@ class PropagandaDranika:
                 base.append(album)
         return base
 
+    def limit_per_artist(albums, max_per_artist: int = 3):
+        artist_count = defaultdict(int)
+        result = []
+        for album in albums:
+            artist_id = album.artist.id
+            if artist_count[artist_id] < max_per_artist:
+                artist_count[artist_id] += 1
+                result.append(album)
+        return result
+
     def build_user_genre_map(user_id: int) -> dict:
         from ..model.rating import Rating
         user_actions = Action.get_all_for_user(user_id)
@@ -48,8 +59,12 @@ class PropagandaDranika:
             action_reference = action.get_target()
             if not action_reference:
                 continue
+            
+            days_old = (datetime.now() - action.timestamp).days
+            time_decay = 0.95 ** days_old
+            weight = PropagandaDranika.ACTION_WEIGHTS[action.name] * (0.5**(action.counter - 1))
+            weight *= time_decay
 
-            weight = PropagandaDranika.ACTION_WEIGHTS[action.name] * (0.5**(action.counter - 1)) #добавити decay, тобто 1 дає 100% score, dali 70% i t.d.
             if action.name == ActionName.RATE_ALBUM:
                 rating_obj = Rating.get_by_album_user_id(action.reference_id, user_id)
                 if rating_obj.score <= 5:
@@ -96,7 +111,8 @@ class PropagandaDranika:
         
     def select_canditates(user_genre_map: dict):
         if len(user_genre_map) < 3:
-            raise ValueError("PIZDA ZAMALO GENRE GG GET GOOD BRO")
+            popular_candidates = Album.get_popular(67)
+            return popular_candidates, popular_candidates, popular_candidates
         top_genre = user_genre_map[0:1]
         secondary_genres = user_genre_map[1:-1]
         last_genre = user_genre_map[-1:]
@@ -160,8 +176,12 @@ class PropagandaDranika:
 
         recommendations = final_A[:a_n] + final_B[:b_n] + final_C[:c_n]
         final_recommendations = PropagandaDranika.deduplicate(recommendations)
+        final_recommendations = PropagandaDranika.limit_per_artist(final_recommendations)
+
         if len(final_recommendations) < n_albums:
-            final_recommendations = PropagandaDranika.refill_with_fallback(final_recommendations, final_A+final_B+final_C, n_albums)
+            all_candidates = PropagandaDranika.deduplicate(final_A+final_B+final_C)
+            all_candidates = PropagandaDranika.limit_per_artist(all_candidates)
+            final_recommendations = PropagandaDranika.refill_with_fallback(final_recommendations, all_candidates, n_albums)
 
 
         print("POPA-=-=-=-=-----------=====", recommendations)

@@ -21,4 +21,15 @@ def artist_show(artist_id):
     
     Action.create_or_increment(name=ActionName.ARTIST_SHOW, user_id=current_user.id, reference_id=artist.id, reference_name=ReferenceClassName.ARTIST)
     
-    
+    top_songs = artist.get_top_songs_deezer()
+    all_albums = artist.get_all_albums_deezer()
+
+    return jsonify({
+        "Artist": artist.to_dict(),
+        "Top_songs": [i.to_dict() for i in top_songs] if top_songs else [],
+        "Albums": [i.to_dict() for i in all_albums] if all_albums else [],
+    }), 200
+
+
+
+

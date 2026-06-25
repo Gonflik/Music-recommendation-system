@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, current_user, get_jwt_identity
 from app.model import Rating, User, Album, Song, Artist, Action
 from app.model.action import ActionName, ReferenceClassName
 
-album_bp = Blueprint('artist', __name__)
+album_bp = Blueprint('album', __name__)
 
 @album_bp.get('/albums')
 @jwt_required()

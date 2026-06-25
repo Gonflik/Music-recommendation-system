@@ -16,7 +16,7 @@ class Song(Base):
     dzid: Mapped[int] = mapped_column(BigInteger, unique=True)
     name: Mapped[str] = mapped_column(String(100))
     length: Mapped[int]
-    song_position: Mapped[int]
+    song_position: Mapped[int | None]
     picture: Mapped[str]
     preview: Mapped[str]
     avg_rating = column_property(
@@ -86,6 +86,8 @@ class Song(Base):
             ).scalar_one_or_none()
             
             if existing_song:
+                if item.get('song_position') is not None:
+                    existing_song.song_position = item['song_position']
                 result.append(existing_song)
                 continue
 
