@@ -13,8 +13,18 @@ from .controller.artist_controller import artist_bp
 from flask_migrate import Migrate
 
 
+import logging
+from .errors import register_error_handler
+
 def create_app(test_config=None):
     app = Flask(__name__)
+
+    if not app.debug:
+        logging.basicConfig(
+            filename='app.log',
+            level=logging.ERROR,
+            format='%(asctime)s %(levelname)s: %(message)s'
+        )
 
     if test_config:
         app.config.update(test_config)
@@ -24,6 +34,7 @@ def create_app(test_config=None):
     
     db.init_app(app)
     jwt.init_app(app)
+    register_error_handler(app)
     
     all_bp = [user_bp, tolisten_bp, rating_bp, search_bp, genre_bp, album_bp, explore_bp, artist_bp]
     for bp in all_bp:
