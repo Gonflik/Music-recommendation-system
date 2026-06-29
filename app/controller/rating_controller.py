@@ -21,10 +21,15 @@ def rating_get_all_for_user(user_id):
 
     return jsonify(results), 200
 
-@rating_bp.get('/users/ratings')
-@jwt_required()
+@rating_bp.get('/ratings')
 def rating_get_all():
-    pass
+    all_ratings = Rating.get_all()
+    if not all_ratings:
+        return jsonify({"message": "No ratings at the moment!"}), 404
+
+    return jsonify({
+        "Ratings": [rating.to_dict() for rating in all_ratings]
+    }), 200
 
 @rating_bp.get('/artists/<int:artist_id>/songs/<int:song_id>/ratings')
 @jwt_required()
@@ -85,13 +90,11 @@ def rating_create_for_album(artist_id, album_id):
     user_id = current_user.id
     rating, errors = Rating.rate_album(artist_id, album_id, data, user_id)
 
-    Action.create_or_increment(name=ActionName.RATE_ALBUM ,user_id=current_user.id, reference_id=album_id, reference_name=ReferenceClassName.ALBUM)
-
     if errors:
         status_code = errors.pop('code', 400)
         return jsonify(errors), status_code
     
-
+    Action.create_or_increment(name=ActionName.RATE_ALBUM ,user_id=current_user.id, reference_id=album_id, reference_name=ReferenceClassName.ALBUM)
 
     return jsonify({"message" : "Rating created",
                     "id": rating.id}), 201

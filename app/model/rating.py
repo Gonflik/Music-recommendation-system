@@ -39,6 +39,15 @@ class Rating(Base):
         )
     
     @classmethod
+    def get_all(cls):
+        from .song import Song
+        from .album import Album
+        from .artist import Artist
+        stmt = select(cls).options(joinedload(cls.song).selectinload(Song.artist), joinedload(cls.album).joinedload(Album.artist))
+        result = db.session.scalars(stmt).all()
+        return result
+
+    @classmethod
     def get_all_ratings_by_user_id(cls, user_id, page: int, per_page: int):
         from .song import Song
         from .album import Album

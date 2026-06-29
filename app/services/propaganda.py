@@ -51,8 +51,6 @@ class PropagandaDranika:
         from ..model.rating import Rating
         user_actions = Action.get_all_for_user(user_id)
         babagaga = [act.to_dict() for act in user_actions]
-        for i in babagaga:
-            print(i)
         user_genre_map = defaultdict(int)
         excluded_album_ids = []
         for action in user_actions:
@@ -106,7 +104,6 @@ class PropagandaDranika:
                     user_genre_map[g.id] += weight
 
         sorted_map = sorted(user_genre_map.items(), key=operator.itemgetter(1), reverse=True)[:5] #mb po inshomu
-        print("DEBUG -----------------------------------------------------------------------------------", sorted_map)
         return sorted_map, excluded_album_ids
         
     def select_canditates(user_genre_map: dict):
@@ -116,7 +113,6 @@ class PropagandaDranika:
         top_genre = user_genre_map[0:1]
         secondary_genres = user_genre_map[1:-1]
         last_genre = user_genre_map[-1:]
-        print("DEBUG------------------------------------------------------", last_genre[0][0])
         candidates_A = []
         candidates_B = []
         candidates_C = []
@@ -154,21 +150,15 @@ class PropagandaDranika:
 
     def get_recommendations(user_id: int, n_albums: int):
         user_genre_map, excluded_ids = PropagandaDranika.build_user_genre_map(user_id)
-        print(f"ADADHSADASHDHADH X----------{excluded_ids}")
         candidates_A, candidates_B, candidates_C = PropagandaDranika.select_canditates(user_genre_map)
-        print("asdada", candidates_A)
-        print("asdada", candidates_B)
-        print("asdada", candidates_C)
 
         sorted_A = PropagandaDranika.score_and_sort_candidates(user_genre_map, candidates_A)
         sorted_B = PropagandaDranika.score_and_sort_candidates(user_genre_map, candidates_B)
         sorted_C = PropagandaDranika.score_and_sort_candidates(user_genre_map, candidates_C)
-        print(sorted_A)
 
         final_A = PropagandaDranika.filter_candidates(sorted_A, excluded_ids)
         final_B = PropagandaDranika.filter_candidates(sorted_B, excluded_ids)
         final_C = PropagandaDranika.filter_candidates(sorted_C, excluded_ids)
-        print(final_A)
 
         a_n = int(n_albums * 0.6)
         b_n = int(n_albums * 0.3)
@@ -184,7 +174,6 @@ class PropagandaDranika:
             final_recommendations = PropagandaDranika.refill_with_fallback(final_recommendations, all_candidates, n_albums)
 
 
-        print("POPA-=-=-=-=-----------=====", recommendations)
         return final_recommendations
 
 

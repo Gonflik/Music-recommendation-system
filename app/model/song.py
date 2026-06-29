@@ -111,9 +111,6 @@ class Song(Base):
                 if art.dzid == item.get('artist_dzid'):
                     artist = art
 
-            print("MATCH SONG ITEM:", item)
-            print("MATCHED ARTIST:", artist)
-            print("MATCHED ALBUM ID:", song_album_id)
             new_song.artist.append(artist)
             
             result.append(new_song)
