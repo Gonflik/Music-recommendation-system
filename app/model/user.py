@@ -1,7 +1,8 @@
 import enum
+import datetime
 from .base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates, reconstructor
-from sqlalchemy import String, ForeignKey, Enum, CheckConstraint, select
+from sqlalchemy import String, ForeignKey, Enum, CheckConstraint, select, func, DateTime
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
 from app.extensions import db
@@ -36,6 +37,9 @@ class User(Base):
         default=GenderEnum.PREFER_NOT_TO_SAY,
     )
     location: Mapped[str | None] = mapped_column(String(100))
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
 
     ratings: Mapped[List["Rating"]] = relationship(back_populates="user")
     tolisten: Mapped[List["ToListen"]] = relationship(back_populates="user")

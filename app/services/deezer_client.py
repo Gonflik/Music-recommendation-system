@@ -214,35 +214,3 @@ class DEEZNUTSAPI:
             })
         return mapped_artists
 
-
-
-# artist = DEEZNUTSAPI.get_artist_by_name(query="Death")
-# for i in artist:
-#     print(i)
-
-
-# songe, albumi, artisto = DEEZNUTSAPI.get_song_by_name(query="Hey Jude")
-# print('-----------------------------SONGS---------------------------')
-# for i in songe:
-#     print(i)
-# print("--------------------------------------------------------------------------------")
-
-# print('----------------------------------ALBUMS-----------------------------------------------')
-# for i in albumi:
-#     print(i)
-# print('----------------------------------------------------------------------------------------------')
-
-# print("------------------------------------------------ARTISTS-----------------------------------------------------------")
-# for i in artisto:
-#     print(i)
-
-
-
-# albums, artists = DEEZNUTSAPI.get_album_by_name(query="In rainbows")
-# print('--------_--------ALBUMS----------------------')
-# for i in albums:
-#     print(i)
-# print('------------------ARTIST---------------------')
-# for i in artists:
-#     print(i)
-

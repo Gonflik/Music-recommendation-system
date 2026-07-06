@@ -58,7 +58,7 @@ class PropagandaDranika:
             if not action_reference:
                 continue
             
-            days_old = (datetime.now() - action.timestamp).days
+            days_old = (datetime.now() - action.created_at).days
             time_decay = 0.95 ** days_old
             weight = PropagandaDranika.ACTION_WEIGHTS[action.name] * (0.5**(action.counter - 1))
             weight *= time_decay

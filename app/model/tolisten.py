@@ -1,7 +1,8 @@
 import enum
+import datetime
 from .base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship, joinedload, validates, selectinload
-from sqlalchemy import String, ForeignKey, select, UniqueConstraint, CheckConstraint, Enum
+from sqlalchemy import String, ForeignKey, select, UniqueConstraint, CheckConstraint, Enum, func, DateTime
 from typing import List, Optional
 from app.extensions import db
 from app.model import Album
@@ -19,6 +20,9 @@ class ToListen(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     album_id: Mapped[int] = mapped_column(ForeignKey("album.id"))
     #object_type: Mapped[ObjectType] = mapped_column()
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
 
     user: Mapped["User"] = relationship(back_populates="tolisten")
     album: Mapped["Album"] = relationship(back_populates="tolisten")

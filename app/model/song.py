@@ -1,10 +1,11 @@
+import datetime
 from .base import Base
 from .rating import Rating #!!!
 from .artist import Artist
 from .album import Album
 from .associations.artist_song_association import artist_song_association
 from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, Session, selectinload
-from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, event, BigInteger
+from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, event, BigInteger, DateTime
 from typing import List, Optional
 from app import db
 from ..services import DEEZNUTSAPI
@@ -24,6 +25,10 @@ class Song(Base):
     )
     
     album_id: Mapped[int | None] = mapped_column(ForeignKey("album.id"))
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
+
 
     artist: Mapped[List["Artist"]] = relationship(
         secondary=artist_song_association,

@@ -34,7 +34,8 @@ class Action(Base):
     reference_id: Mapped[int]
     counter: Mapped[int] = mapped_column(Integer, default=1)
     
-    timestamp: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
 
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     user: Mapped["User"] = relationship(back_populates="actions")
@@ -81,6 +82,6 @@ class Action(Base):
             "reference_name": self.reference_name,
             "reference_id": self.reference_id,
             "counter": self.counter,
-            "timestamp": self.timestamp,
+            "created_at": self.created_at,
             "user_id": self.user_id,
         }

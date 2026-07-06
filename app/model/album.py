@@ -5,7 +5,7 @@ from app.model.genre import Genre
 from app.model.artist import Artist
 from .associations.album_genre_association import album_genre_association
 from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, selectinload
-from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, BigInteger, Date
+from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, BigInteger, Date, DateTime
 from typing import List
 from app import db
 
@@ -25,6 +25,9 @@ class Album(Base):
     )
     #maybe add count of the total ratings
     artist_id: Mapped[int] = mapped_column(ForeignKey("artist.id"))
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
 
     genres: Mapped[List["Genre"]] = relationship(
         secondary=album_genre_association,
@@ -88,10 +91,6 @@ class Album(Base):
                 album_artist_id = fallback.id
             #-------------------------------------------------------------------------------------------------
             album_genre = Genre.write_genre(genre_data=item.get('genres'))         
-            print("ALBUM ITEM:", item)
-            print("ARTISTS:", [(a.id, a.dzid, a.name) for a in artist_list])
-            print("ALBUM ARTIST DZID:", item.get("artist_dzid"))
-            print("FOUND ARTIST ID:", album_artist_id)
             new_album = Album(
                 name = item.get('name'),
                 dzid = item.get('dzid'),

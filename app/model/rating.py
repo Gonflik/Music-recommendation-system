@@ -1,7 +1,8 @@
+import datetime
 from sqlalchemy.orm import (Mapped, mapped_column, relationship, 
                             validates, joinedload, load_only, 
                             selectinload, reconstructor)
-from sqlalchemy import String, Text, CheckConstraint, ForeignKey, select, UniqueConstraint
+from sqlalchemy import String, Text, CheckConstraint, ForeignKey, select, UniqueConstraint, func, DateTime
 from typing import List, Optional
 from app import db
 from .base import Base
@@ -16,7 +17,10 @@ class Rating(Base):
     album_id: Mapped[int | None] = mapped_column(ForeignKey("album.id"))
     song_id: Mapped[int | None] = mapped_column(ForeignKey("song.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-    
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
+
     album: Mapped["Album"] = relationship(back_populates="ratings")
     song: Mapped["Song"] = relationship(back_populates="ratings")
     user: Mapped["User"] = relationship(back_populates="ratings")

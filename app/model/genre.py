@@ -1,10 +1,10 @@
+import datetime
 from .base import Base
-
 from app import db
 from.associations.album_genre_association import album_genre_association
 from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload, joinedload
 from typing import List
-from sqlalchemy import select
+from sqlalchemy import select, func, DateTime
 
 
 class Genre(Base):
@@ -13,6 +13,9 @@ class Genre(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     dzid: Mapped[int] = mapped_column(unique=True)
     name: Mapped[str]
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
 
     albums: Mapped[List["Album"]] = relationship(
         secondary=album_genre_association,

@@ -1,5 +1,6 @@
+import datetime
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates, reconstructor
-from sqlalchemy import String, CheckConstraint, select, cast, or_, BigInteger
+from sqlalchemy import String, CheckConstraint, select, cast, or_, BigInteger, DateTime, func
 from typing import List, Optional
 from .base import Base
 from .associations.artist_song_association import artist_song_association
@@ -16,6 +17,9 @@ class Artist(Base):
     picture: Mapped[str]
     ghost_albums_count: Mapped[int]
     
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
+
     albums: Mapped[List["Album"]] = relationship(back_populates="artist")
     songs: Mapped[List["Song"]] = relationship(
         secondary=artist_song_association,
