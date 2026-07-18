@@ -19,9 +19,15 @@ class Song(Base):
     length: Mapped[int]
     song_position: Mapped[int | None]
     picture: Mapped[str]
-    preview: Mapped[str]
+    preview: Mapped[str | None]
     avg_rating = column_property(
         select(func.avg(Rating.score)).where(Rating.song_id == id).correlate_except(Rating).scalar_subquery()
+    )
+    rating_count = column_property(
+        select(func.count(Rating.id))
+        .where(Rating.song_id == id)
+        .correlate_except(Rating)
+        .scalar_subquery()
     )
     
     album_id: Mapped[int | None] = mapped_column(ForeignKey("album.id"))
@@ -39,7 +45,7 @@ class Song(Base):
 
     __table_args__ = (
         CheckConstraint("LENGTH(name) > 0", name="ck_name_length"),
-        CheckConstraint("length > 30", name="ck_length_value"), 
+        CheckConstraint("length > 5", name="ck_length_value"), 
     )
 
     @validates('name')
@@ -50,8 +56,8 @@ class Song(Base):
     
     @validates('length')
     def validate_length(self,key, length):
-        if length < 30:
-            raise ValueError("Song too short(min length 30s)")
+        if length < 5:
+            raise ValueError("Song too short(min length 5s)")
         return length
 
     @event.listens_for(Session, "before_flush")
@@ -66,6 +72,12 @@ class Song(Base):
         stmt = select(cls).where(cls.id==song_id)
         song = db.session.scalar(stmt)
         return song
+
+    @classmethod
+    def get_top_songs(cls, limit: int):
+        stmt = select(cls).options(joinedload(cls.artist), selectinload(cls.album)).order_by(cls.avg_rating.desc().nulls_last(), cls.rating_count.desc()).limit(limit)
+        result = db.session.scalars(stmt).unique().all()
+        return result
 
     @classmethod
     def search_for_song_by_query(cls, query, per_page: int, page: int):
@@ -134,7 +146,9 @@ class Song(Base):
             "length": self.length,
             "song_position": self.song_position,
             "picture": self.picture,
-            "preview": self.preview,
+            "preview": self.preview if self.preview else None,
+            "avg_rating": (float(str(self.avg_rating)[:4]) if self.avg_rating else None),
+            "rating_count": self.rating_count,
             "artist_name": self.artist[0].name,
             "artist_id": self.artist[0].id,
             "album_name": self.album.name if self.album else None,
