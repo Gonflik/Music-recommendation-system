@@ -23,6 +23,12 @@ class Album(Base):
     avg_rating: Mapped[float] = column_property(
         select(func.avg(Rating.score)).where(Rating.album_id == id).correlate_except(Rating).scalar_subquery()
     )
+    rating_count = column_property(
+        select(func.count(Rating.id))
+        .where(Rating.album_id == id)
+        .correlate_except(Rating)
+        .scalar_subquery()
+    )
     #maybe add count of the total ratings
     artist_id: Mapped[int] = mapped_column(ForeignKey("artist.id"))
 
@@ -153,7 +159,7 @@ class Album(Base):
     
     @classmethod
     def get_popular(cls, limit: int):
-        stmt = select(cls).options(selectinload(cls.songs), selectinload(cls.genres), joinedload(cls.artist)).order_by(cls.avg_rating.desc()).limit(limit)
+        stmt = select(cls).options(selectinload(cls.songs), selectinload(cls.genres), joinedload(cls.artist)).order_by(cls.avg_rating.desc().nulls_last()).limit(limit)
         result = db.session.scalars(stmt).unique().all()
         return result
 
@@ -188,6 +194,8 @@ class Album(Base):
             "name": self.name,
             "length": self.length if self.length else None,
             "picture": self.picture,
+            "avg_rating": (float(self.avg_rating) if self.avg_rating else None),
+            "rating_count": self.rating_count,
             "genres": [genre.to_dict() for genre in self.genres] if self.genres else [],
             "ghost_songs_count": self.ghost_songs_count if self.ghost_songs_count else None,
             "release_date": self.release_date.strftime("%B %d, %Y") if self.release_date else None,
