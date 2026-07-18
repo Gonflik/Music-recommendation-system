@@ -43,12 +43,15 @@ class DEEZNUTSAPI:
             results_songs, results_albums, results_artists = DEEZNUTSAPI._format_song_with_its_artist_and_album(client=client, song_data=song_objects, no_album=fresh_album_dict, include_track_position=True)
             return results_songs, [results_albums], results_artists
    
-    def load_top_artists_songs(artist_dzid: int):
+    def load_top_artists_songs(artist_dzid: int, limit: int):
         with deezer.Client() as client:
             artist = client.get_artist(artist_dzid)
-            top_songs = artist.get_top()
+            top_songs = artist.get_top() 
+            all_top = len(top_songs)
+            if limit:
+               top_songs = top_songs[:limit]
             result_top_songs, result_albums, result_artists = DEEZNUTSAPI._format_song_with_its_artist_and_album(client=client, song_data=top_songs, known_artist=artist)
-            return result_top_songs, result_albums, result_artists
+            return result_top_songs, result_albums, result_artists, all_top
 
     def load_all_artists_albums(artist_dzid: int):
         with deezer.Client() as client:
@@ -83,8 +86,8 @@ class DEEZNUTSAPI:
                 "dzid": song.id,   
                 "length": song.duration,
                 "song_position": song.track_position if include_track_position else None,                                           
-                "picture": song.album.cover,
-                "preview": song.preview,
+                "picture": song.album.cover_xl,
+                "preview": None,
                 "artist_name": song.artist.name,
                 "artist_dzid": song.artist.id,
                 "album_name": song.album.title,
@@ -112,7 +115,7 @@ class DEEZNUTSAPI:
                 "name": album.title,
                 "dzid": album.id,
                 "length": album.duration,
-                "picture": album.cover,
+                "picture": album.cover_xl,
                 "genres": genres,
                 "ghost_songs_count": album.nb_tracks,
                 "release_date": album.release_date,
@@ -168,7 +171,7 @@ class DEEZNUTSAPI:
                         "name": song.album.title,
                         "dzid": song.album.id,
                         "length": None,
-                        "picture": song.album.cover,
+                        "picture": song.album.cover_xl,
                         "genres": [],
                         "ghost_songs_count": None,
                         "release_date": None,       # fixed
@@ -185,7 +188,7 @@ class DEEZNUTSAPI:
                         "name": album.title,
                         "dzid": album.id,
                         "length": album.duration,
-                        "picture": album.cover,
+                        "picture": album.cover_xl,
                         "genres": genres,
                         "ghost_songs_count": album.nb_tracks,
                         "release_date": album.release_date,
