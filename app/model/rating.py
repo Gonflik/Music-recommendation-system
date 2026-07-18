@@ -59,6 +59,7 @@ class Rating(Base):
         stmt = select(cls).where(cls.user_id==user_id).options(
             joinedload(cls.song).load_only(Song.id,Song.name,Song.length).selectinload(Song.artist).load_only(Artist.name),
             joinedload(cls.album).load_only(Album.id,Album.name,Album.length).joinedload(Album.artist).load_only(Artist.name),
+            joinedload(cls.user),
         ).limit(per_page).offset((page-1) * per_page)
         result = db.session.scalars(stmt).unique().all()
         return result
@@ -72,6 +73,7 @@ class Rating(Base):
             joinedload(cls.song).selectinload(Song.artist),
             joinedload(cls.album).joinedload(Album.artist),
             joinedload(cls.album).selectinload(Album.genres),
+            joinedload(cls.user),
         )
         result = db.session.scalars(stmt).unique().all()
         return result
@@ -84,6 +86,7 @@ class Rating(Base):
         stmt = select(cls).where(cls.song_id==song_id).options(
             joinedload(cls.song).selectinload(Song.artist),
             joinedload(cls.album).joinedload(Album.artist),
+            joinedload(cls.user),
         )
         result = db.session.scalars(stmt).unique().all()
         return result
@@ -97,21 +100,42 @@ class Rating(Base):
             joinedload(cls.song).selectinload(Song.artist),
             joinedload(cls.album).joinedload(Album.artist),
             joinedload(cls.album).selectinload(Album.genres),
+            joinedload(cls.user),
         )
         result = db.session.scalar(stmt)
         return result
 
     @classmethod
+    def count_user_ratings(cls, user_id):
+        stmt = select(func.count(Rating.id)).where(Rating.user_id==user_id)
+        return db.session.scalar(stmt)
+    
+    @classmethod
+    def count_user_song_album_ratings(cls, user_id):
+        stmt1 = select(func.count(Rating.id)).where(Rating.user_id==user_id, (Rating.song_id).is_not(None))
+        songs = db.session.scalar(stmt1)
+
+        stmt2 = select(func.count(Rating.id)).where(Rating.user_id==user_id, (Rating.album_id).is_not(None))
+        albums = db.session.scalar(stmt2)
+        return songs, albums
+
+    @classmethod
+    def get_users_recent(cls, user_id):
+        stmt = select(Rating).where(Rating.user_id==user_id).order_by(Rating.created_at.desc()).limit(5)
+        result = db.session.scalars(stmt)
+        return result
+
+    @classmethod
     def get_by_album_user_id(cls, album_id, user_id):
         from .album import Album
-        stmt = select(cls).where(cls.album_id==album_id, cls.user_id==user_id).options(joinedload(cls.album).joinedload(Album.artist))
+        stmt = select(cls).where(cls.album_id==album_id, cls.user_id==user_id).options(joinedload(cls.album).joinedload(Album.artist), joinedload(cls.user))
         result = db.session.scalar(stmt)
         return result
 
     @classmethod
     def get_by_song_user_id(cls, song_id, user_id):
         from .song import Song
-        stmt = select(cls).where(cls.song_id==song_id, cls.user_id==user_id).options(joinedload(cls.song).joinedload(Song.artist))
+        stmt = select(cls).where(cls.song_id==song_id, cls.user_id==user_id).options(joinedload(cls.song).joinedload(Song.artist), joinedload(cls.user))
         result = db.session.scalar(stmt)
         return result
 
@@ -120,7 +144,7 @@ class Rating(Base):
         if score > 10 or score < 0:
             self.errors.append(f"Score: {score} is out of scope!(0-10)")
         return score
-
+#
     @validates('description')
     def validate_description(self, key, description):
         if description is not None:
@@ -166,7 +190,11 @@ class Rating(Base):
         return {
             "id": self.id,
             "score": self.score,
-            "description": f"{self.description[:100]}..." if self.description else "5 centimeters per second",
+            "description": f"{self.description}" if self.description else "5 centimeters per second",
+            "user": {
+                "id": self.user.id,
+                "name": self.user.name,
+            },
             f"{target.__class__.__name__}": target.to_dict(),
         }
 
@@ -230,8 +258,10 @@ class Rating(Base):
         return new_rating, None
     
     def update(self, data):
-        self.score = data.get('score')
-        self.description = data.get('description')
+        if data.get('score'):
+            self.score = data.get('score')
+        if data.get('description'):
+            self.description = data.get('description')
 
         if len(self.errors) > 0:
             return False, {"error": self.errors, "code": 400}
