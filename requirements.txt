@@ -6,6 +6,7 @@ certifi==2026.2.25
 click==8.3.1
 coverage==7.13.4
 deezer-python==7.2.0
+dotenv==0.9.9
 factory_boy==3.3.3
 Faker==40.4.0
 Flask==3.1.2
@@ -30,6 +31,7 @@ Pygments==2.19.2
 PyJWT==2.11.0
 pytest==9.0.2
 python-dotenv==1.2.1
+redis==8.0.1
 SQLAlchemy==2.0.46
 SQLAlchemy-Utils==0.42.1
 typing_extensions==4.15.0
