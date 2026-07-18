@@ -29,6 +29,7 @@ class User(Base):
         nullable=False,
         default=UserRole.USER,
     )
+    bio: Mapped[str | None] = mapped_column(String(300))
     password: Mapped[str] 
     age: Mapped[int | None]
     gender: Mapped[GenderEnum] = mapped_column(
@@ -138,6 +139,7 @@ class User(Base):
             "email" : self.email,
             "id" : self.id,
             "name" : self.name,
+            "bio": self.bio,
             "age" : self.age,
             "gender": self.gender,
             "location": self.location
