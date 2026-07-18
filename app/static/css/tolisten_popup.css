@@ -1,0 +1,58 @@
+.tl-popup {
+  position: relative;
+  width: 480px;
+  max-width: calc(100% - 32px);
+  padding: 36px 40px;
+}
+.tl-popup-bg {
+  position: absolute; inset: 0;
+  background: #fffdf5;
+  border: 2.5px solid #000;
+  border-radius: 24px;
+  box-shadow: 6px 6px 0 #000;
+  transform: rotate(-0.3deg);
+}
+.tl-popup-close {
+  position: absolute; top: 14px; right: 18px;
+  background: none; border: none; font-size: 1.2rem;
+  cursor: pointer; z-index: 2; color: #aaa;
+  font-family: 'Indie Flower', cursive;
+}
+.tl-popup-close:hover { color: #000; }
+.tl-popup-content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.tl-popup-title {
+  font-size: 1.6rem; font-weight: 400;
+  background: linear-gradient(90deg, #000 0%, #BA76BB 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.tl-popup-subtitle { font-size: .95rem; color: #888; margin-top: -8px; }
+.tl-popup-note {
+  font-family: 'Indie Flower', cursive; font-size: 1rem;
+  border: 2px solid #ccc; border-radius: 12px;
+  padding: 10px 14px; resize: none; background: #fff;
+  outline: none; transition: border-color .15s;
+  box-shadow: 3px 3px 0 #eee;
+}
+.tl-popup-note:focus { border-color: #BA76BB; box-shadow: 3px 3px 0 #BA76BB; }
+.tl-popup-note::placeholder { color: #ccc; }
+.tl-popup-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.tl-popup-cancel {
+  background: #fff; color: #888; border: 2px solid #ccc;
+  border-radius: 999px; padding: 6px 20px;
+  font-family: 'Indie Flower', cursive; font-size: 1rem; cursor: pointer;
+}
+.tl-popup-cancel:hover { border-color: #aaa; }
+.tl-popup-submit {
+  background: #000; color: #fff; border: 2px solid #000;
+  border-radius: 999px; padding: 6px 20px;
+  font-family: 'Indie Flower', cursive; font-size: 1rem;
+  cursor: pointer; box-shadow: 3px 3px 0 #555;
+  transition: transform .1s, box-shadow .1s;
+}
+.tl-popup-submit:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 #555; }
+.tl-popup-submit:disabled { opacity: .4; cursor: default; transform: none; }

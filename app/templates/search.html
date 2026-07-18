@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search – ratestuff.fm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/burger.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tolisten_popup.css') }}" />
+</head>
+<body>
+  <div class="page-grid" aria-hidden="true"></div>
+
+  <header class="site-navbar">
+    <img src="{{ url_for('static', filename='images/navbar.png') }}" alt="Navbar sketch background" class="navbar-bg">
+    <div class="navbar-content">
+      <div class="nav-left">
+        <a href="{{ url_for('explore.index') }}">
+          <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+        </a>
+        <span class="nav-site-name gradient-text">ratestuff.fm</span>
+        <nav class="nav-links">
+          <a href="{{ url_for('explore.explore_page') }}" class="nav-link gradient-text">Explore</a>
+          <a href="{{ url_for('tolisten.tolisten_page') }}" class="nav-link gradient-text">ToListen</a>
+          <a href="{{ url_for('rating.rating_page') }}" class="nav-link gradient-text">Ratings</a>
+        </nav>
+      </div>
+      <div class="nav-right">
+        <a href="{{ url_for('user.user_login') }}" class="nav-link">Log In</a>
+        <a href="{{ url_for('user.register_page') }}" class="nav-link">Sign Up</a>
+      </div>
+      <button class="burger-btn" id="burgerBtn" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main class="page-content">
+
+    <section class="search-hero">
+      <div class="search-hero-bg"></div>
+      <h1 class="search-hero-title">find stuff</h1>
+      <div class="search-wrap">
+        <div class="search-box-bg"></div>
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="artist, album, song…"
+          autocomplete="off"
+        />
+        <button class="search-clear" id="searchClear" aria-label="Clear">✕</button>
+      </div>
+    </section>
+
+    <div id="searchResults" class="search-results">
+      <p class="search-hint">start typing to search</p>
+    </div>
+
+    <div class="search-pagination" id="searchPagination" style="display:none;">
+      <button class="page-btn" id="prevBtn" disabled>← prev</button>
+      <span class="page-indicator" id="pageIndicator">page 1</span>
+      <button class="page-btn" id="nextBtn" disabled>next →</button>
+    </div>
+
+  </main>
+
+  <div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-backdrop" id="navBackdrop"></div>
+    <div class="mobile-nav-panel">
+      <button class="mobile-nav-close" id="navClose">✕</button>
+      <p class="mobile-nav-label">Pages</p>
+      <div class="mobile-nav-links">
+        <a href="{{ url_for('explore.explore_page') }}" class="mobile-nav-link gradient-text">Explore</a>
+        <a href="{{ url_for('tolisten.tolisten_page') }}" class="mobile-nav-link gradient-text">ToListen</a>
+        <a href="{{ url_for('rating.rating_page') }}" class="mobile-nav-link gradient-text">Ratings</a>
+      </div>
+      <hr class="mobile-nav-divider">
+      <p class="mobile-nav-label">Account</p>
+      <div class="mobile-nav-auth">
+        <a href="{{ url_for('user.user_login') }}" class="mobile-nav-auth-link">Log In</a>
+        <a href="{{ url_for('user.register_page') }}" class="mobile-nav-auth-link">Sign Up</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <script type="module" src="{{ url_for('static', filename='js/search.js') }}"></script>
+</body>
+</html>
