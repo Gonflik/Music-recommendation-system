@@ -65,6 +65,8 @@ class PropagandaDranika:
 
             if action.name == ActionName.RATE_ALBUM:
                 rating_obj = Rating.get_by_album_user_id(action.reference_id, user_id)
+                if not rating_obj:
+                    continue
                 if rating_obj.score <= 5:
                     excluded_album_ids.append(action_reference.id)
                     for g in action_reference.genres:
@@ -76,6 +78,8 @@ class PropagandaDranika:
 
             elif action.name == ActionName.RATE_SONG:
                 rating_obj = Rating.get_by_song_user_id(action.reference_id, user_id)
+                if not rating_obj:
+                    continue
                 if rating_obj.score <= 5:
                     excluded_album_ids.append(action_reference.album.id)
                     for g in action_reference.album.genres:
