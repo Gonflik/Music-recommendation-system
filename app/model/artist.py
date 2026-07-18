@@ -65,15 +65,15 @@ class Artist(Base):
         result = db.session.scalars(stmt).all()
         return result
     #------------------------------------------------------------------------------------------------------------------------
-    def get_top_songs_deezer(self):
+    def get_top_songs_deezer(self, limit: int):
         from .song import Song
         from app.services.deezer_client import DEEZNUTSAPI
-        top_songs, albums, artists = DEEZNUTSAPI.load_top_artists_songs(self.dzid)
+        top_songs, albums, artists, all_top = DEEZNUTSAPI.load_top_artists_songs(self.dzid, limit=limit)
         if not top_songs:
             return []
         
         result = Song.write_songs_with_artists_and_albums(song_data=top_songs, artist_data=artists, album_data=albums)
-        return result
+        return result, all_top
 
     def get_all_albums_deezer(self):
         from .album import Album

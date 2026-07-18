@@ -10,8 +10,8 @@ from .controller.search_controller import search_bp
 from .controller.album_controller import album_bp
 from .controller.explore_controller import explore_bp
 from .controller.artist_controller import artist_bp
+from .controller.song_controller import song_bp
 from flask_migrate import Migrate
-
 
 import logging
 from .errors import register_error_handler
@@ -36,7 +36,7 @@ def create_app(test_config=None):
     jwt.init_app(app)
     register_error_handler(app)
     
-    all_bp = [user_bp, tolisten_bp, rating_bp, search_bp, genre_bp, album_bp, explore_bp, artist_bp]
+    all_bp = [user_bp, tolisten_bp, rating_bp, search_bp, genre_bp, album_bp, explore_bp, artist_bp, song_bp]
     for bp in all_bp:
         app.register_blueprint(bp)
 
