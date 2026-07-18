@@ -24,6 +24,8 @@ class ToListen(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
 
+    listened: Mapped[bool] = mapped_column(default=False)
+
     user: Mapped["User"] = relationship(back_populates="tolisten")
     album: Mapped["Album"] = relationship(back_populates="tolisten")
 
@@ -43,6 +45,22 @@ class ToListen(Base):
         result = db.session.scalar(stmt)
         return result
     
+    @classmethod
+    def exists_for_user(cls, user_id, album_id):
+        stmt = select(cls).filter_by(user_id=user_id, album_id=album_id)
+        return db.session.scalar(stmt) is not None
+    
+    @classmethod
+    def get_users_recent(cls, user_id):
+        stmt = select(ToListen).options(joinedload(cls.album).joinedload(Album.artist), joinedload(cls.album).selectinload(Album.genres)).where(ToListen.user_id==user_id).order_by(ToListen.created_at.desc()).limit(5)
+        result = db.session.scalars(stmt)
+        return result
+
+    @classmethod
+    def count_user_tolisten(cls, user_id):
+        stmt = select(func.count(ToListen.id)).where(ToListen.user_id==user_id)
+        return db.session.scalar(stmt)
+
     #you need to pass user_id before when creating a ToListen, so it works fine
     @validates('album_id')
     def validate_album_id(self, key, album_id):
@@ -68,3 +86,13 @@ class ToListen(Base):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "note": self.note,
+            "listened": self.listened,
+            "created_at": self.created_at,
+            "Album": self.album.to_dict()
+        }
