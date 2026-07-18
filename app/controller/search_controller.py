@@ -1,10 +1,15 @@
-from flask import Blueprint, jsonify, request, url_for
-from app.model import Artist, Album, Song
-from flask_jwt_extended import jwt_required
+from flask import Blueprint, jsonify, request, url_for, render_template
+from app.model import Artist, Album, Song, ToListen
+from flask_jwt_extended import jwt_required, current_user
 
 search_bp = Blueprint('search', __name__)
 
+
 @search_bp.get('/search')
+def search_page():
+    return render_template("search.html")
+
+@search_bp.get('/api/search')
 @jwt_required()
 def search():
     page = request.args.get('page', default=1, type=int)
@@ -21,10 +26,16 @@ def search():
     if not artists and not songs and not albums:
         return jsonify({"error": "Not found!"}), 404
     
+    albums_out = []
+    for album in albums:
+        d = album.to_dict()
+        d["in_tolisten"] = ToListen.exists_for_user(current_user.id, album.id)
+        albums_out.append(d)
+
     raw_result = {
         "Artists": [artist.to_dict() for artist in artists] if artists else artists,
         "Songs": [song.to_dict() for song in songs] if songs else songs,
-        "Albums": [album.to_dict() for album in albums] if albums else albums,
+        "Albums": albums_out,
         "links": {
             "next_page": url_for('search.search',q=query ,page = page + 1, per_page = per_page),
             "prev_page": url_for('search.search',q=query, page = (page - 1) if page - 1 != 0 else page, per_page=per_page)

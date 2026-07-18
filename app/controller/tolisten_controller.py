@@ -1,14 +1,19 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from app.model import ToListen, Album, User, Action
 from app.model.action import ActionName, ReferenceClassName
-from flask_jwt_extended import jwt_required, current_user
+from flask_jwt_extended import jwt_required, current_user, get_jwt_identity
 
 
 tolisten_bp = Blueprint('tolisten', __name__)
 
-@tolisten_bp.get('/users/<int:user_id>/tolisten')
+@tolisten_bp.get('/tolisten')
+def tolisten_page():
+    return render_template("tolisten.html")
+
+@tolisten_bp.get('/api/tolisten')
 @jwt_required()
-def tolisten_get_by_user_id(user_id):
+def tolisten_get_by_user_id():
+    user_id = current_user.id
     entries = ToListen.get_all_join_album_join_artist_by_user_id(user_id)
     results = []
     total_length = 0
@@ -16,16 +21,18 @@ def tolisten_get_by_user_id(user_id):
         results.append({
             "id": entry.id,
             "note": entry.note,
+            "listened": entry.listened,
+            "created_at": entry.created_at,
             "Album": entry.album.to_dict()
         })
         total_length += entry.album.length
-    return jsonify({"ToListen": results,
+    return jsonify({"ToListen": sorted(results, key=lambda x: x.get("created_at")),
                     "Total ToListen length": f"{total_length/60} sec"
     })
 
-@tolisten_bp.post('/users/<int:user_id>/tolisten')
+@tolisten_bp.post('/api/tolisten')
 @jwt_required()
-def tolisten_add_album_to_user(user_id):
+def tolisten_add_album_to_user():
     data = request.get_json()
     
     note = data.get('note', '')
@@ -37,47 +44,39 @@ def tolisten_add_album_to_user(user_id):
         return jsonify({"message": "Album not found!"}), 404
     
 
-    tolisten_entry = ToListen(note=note, user_id=user_id, album_id=album_id)
+    tolisten_entry = ToListen(note=note, user_id=current_user.id, album_id=album_id)
     tolisten_entry.save()
 
     Action.create_or_increment(name=ActionName.ADD_TO_LISTEN ,user_id=current_user.id, reference_id=album_id, reference_name=ReferenceClassName.ALBUM)
 
     return jsonify({"message": "Album succesfully added!"}), 201
     
-@tolisten_bp.delete('/users/<int:user_id>/tolisten')
-def tolisten_delete_album(user_id):
+@tolisten_bp.delete('/api/tolisten/<int:tolisten_id>')
+@jwt_required()
+def tolisten_delete_album(tolisten_id):
     data = request.get_json()
-    
-    tolisten_entry_id = data.get('tolisten_id')
-    if not tolisten_entry_id:
-        return jsonify({"message": "Missing required field!(tolisten_id"}), 400
 
-    entry = ToListen.get_one_tolisten_by_id(tolisten_entry_id)
+    entry = ToListen.get_one_tolisten_by_id(tolisten_id)
     if entry:
-        if entry.user_id != user_id:
-            return jsonify({"message": "Unauthorized! This is not your entry"}), 403
         entry.delete()
         return jsonify({"message": "ToListen entry deleted successfully!"}), 200
     return jsonify({"message": "No ToListen entry with such id!"}), 404
     
 
-@tolisten_bp.put('/users/<int:user_id>/tolisten')
-def tolisten_update_note(user_id):
+@tolisten_bp.patch('/api/tolisten/<int:tolisten_id>')
+@jwt_required()
+def tolisten_update_note(tolisten_id):
     data = request.get_json()
-
-    user = User.get_user_by_id(user_id)
-    if not user:
-        return jsonify({"message" : "User not found!"}), 404
     
-    tolisten_entry_id = data.get('tolisten_id')
-    if not tolisten_entry_id:
-        return jsonify({"message": "Missing required field!(tolisten_id"}), 400
+    entry = ToListen.get_one_tolisten_by_id(tolisten_id)
+    if not entry:
+        return jsonify({"message": "No ToListen entry with such id!"}), 404
+    note = data.get('note')
+    if "note" in data:  
+        entry.note = note
+    listened = data.get('listened')
+    if "listened" in data:
+        entry.listened = listened
+    entry.save()
+    return jsonify({"message": "Note updated successfully!"}), 200
     
-    entry = ToListen.get_one_tolisten_by_id(tolisten_entry_id)
-    if entry:
-        if entry.user_id != user_id:
-            return jsonify({"message": "Unauthorized! This is not your entry"}), 403
-        entry.note = data.get('note')
-        entry.save()
-        return jsonify({"message": "Note updated successfully!"}), 200
-    return jsonify({"message": "No ToListen entry with such id!"}), 404

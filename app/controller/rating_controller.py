@@ -1,27 +1,30 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from flask_jwt_extended import jwt_required, current_user, get_jwt_identity
 from app.model import Rating, User, Album, Song, Action, Artist
 from app.model.action import ReferenceClassName, ActionName
 
 rating_bp = Blueprint('rating', __name__)
 
+@rating_bp.get('/ratings')
+def rating_page():
+    return render_template("ratings.html")
 
-@rating_bp.get('/users/<int:user_id>/ratings')
+@rating_bp.get('/api/me/ratings')
 @jwt_required()
-def rating_get_all_for_user(user_id):
-    current_user = User.get_user_by_id(user_id)
-    if not current_user:
-        return jsonify({"error" : "User not found!"}), 404
-    
+def rating_get_all_for_user():
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=5, type=int)
-    all_ratings = Rating.get_all_ratings_by_user_id(user_id, page, per_page)
-    
-    results = {"Ratings": [rating.to_dict() for rating in all_ratings]}
+    all_ratings = Rating.get_all_ratings_by_user_id(current_user.id, page, per_page)
+    ratings_count = Rating.count_user_ratings(current_user.id)
+
+    results = {"Ratings": [rating.to_dict() for rating in all_ratings],
+               "total": ratings_count,
+               }
+
 
     return jsonify(results), 200
 
-@rating_bp.get('/ratings')
+@rating_bp.get('/api/ratings')
 def rating_get_all():
     all_ratings = Rating.get_all()
     if not all_ratings:
@@ -31,7 +34,7 @@ def rating_get_all():
         "Ratings": [rating.to_dict() for rating in all_ratings]
     }), 200
 
-@rating_bp.get('/artists/<int:artist_id>/songs/<int:song_id>/ratings')
+@rating_bp.get('/api/artists/<int:artist_id>/songs/<int:song_id>/ratings')
 @jwt_required()
 def rating_get_all_for_songs(artist_id, song_id):
     existing_artist = Artist.get_artist_by_id(artist_id)
@@ -48,7 +51,7 @@ def rating_get_all_for_songs(artist_id, song_id):
 
     return jsonify(results), 200
 
-@rating_bp.get('/artists/<int:artist_id>/albums/<int:album_id>/ratings')
+@rating_bp.get('/api/artists/<int:artist_id>/albums/<int:album_id>/ratings')
 @jwt_required()
 def rating_get_all_for_album(artist_id, album_id):
     existing_artist = Artist.get_artist_by_id(artist_id)
@@ -65,7 +68,7 @@ def rating_get_all_for_album(artist_id, album_id):
 
     return jsonify(results), 200
 
-@rating_bp.post('/artists/<int:artist_id>/albums/<int:album_id>/ratings')
+@rating_bp.post('/api/artists/<int:artist_id>/albums/<int:album_id>/ratings')
 @jwt_required()
 def rating_create_for_album(artist_id, album_id):
     user = current_user
@@ -99,7 +102,7 @@ def rating_create_for_album(artist_id, album_id):
     return jsonify({"message" : "Rating created",
                     "id": rating.id}), 201
 
-@rating_bp.post('/artists/<int:artist_id>/songs/<int:song_id>/ratings')
+@rating_bp.post('/api/artists/<int:artist_id>/songs/<int:song_id>/ratings')
 @jwt_required()
 def rating_create_for_song(artist_id, song_id):
     user = current_user
@@ -133,22 +136,13 @@ def rating_create_for_song(artist_id, song_id):
                     "id": rating.id}), 201
 
 
-@rating_bp.put('/users/<int:user_id>/ratings/<int:rating_id>')
+@rating_bp.patch('/api/users/me/ratings/<int:rating_id>')
 @jwt_required()
-def rating_update_put(user_id, rating_id):
-    current_user = User.get_user_by_id(user_id)
-    if not current_user:
-        return jsonify({"error" : "User not found!"}), 404
-    
+def rating_update_put(rating_id):
     if get_jwt_identity() != current_user.email:
         return jsonify({"message": "You are not authorized to access this!"}), 401
     
-    data = request.get_json()
-    required_fields = ['score','description']
-    missing = [miss for miss in required_fields if miss not in data]
-    if missing:
-        return jsonify({"error": "Missing required fields!", "missing": missing, }), 400
-    
+    data = request.get_json()    
     rating = Rating.get_one_rating_by_id(rating_id)
 
     success, errors = rating.update(data)
@@ -163,13 +157,9 @@ def rating_update_put(user_id, rating_id):
 
 
 #shota vpadlu, potim shne)
-@rating_bp.delete('/users/<int:user_id>/ratings/<int:rating_id>')
+@rating_bp.delete('/api/users/me/ratings/<int:rating_id>')
 @jwt_required()
-def rating_delete(user_id, rating_id):
-    user = User.get_user_by_id(user_id)
-    if not user:
-        return jsonify({"error" : "User not found!"}), 404
-    
+def rating_delete(rating_id):
     if get_jwt_identity() != current_user.email:
         return jsonify({"message": "You are not authorized to access this!"}), 401
     
