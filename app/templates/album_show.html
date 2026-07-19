@@ -55,11 +55,11 @@
         </p>
         <div class="show-details-row" id="showDetailsRow"></div>
         <div class="show-rating-summary" id="showRatingSummary"></div>
-      </div>
-      <div class="show-hero-actions">
-        <button class="back-btn" id="backBtn">← back</button>
-        <button class="tl-btn" id="heroTlBtn">+ ToListen</button>
-        <button class="rate-album-btn" id="rateAlbumBtn">★ rate</button>
+        <div class="show-hero-actions">
+          <button class="back-btn" id="backBtn">← back</button>
+          <button class="tl-btn" id="heroTlBtn">+ ToListen</button>
+          <button class="rate-album-btn" id="rateAlbumBtn">★ rate</button>
+        </div>
       </div>
     </section>
 
@@ -156,7 +156,7 @@
         <div class="footer-nav-group">
           <p class="footer-group-label">Account</p>
           <div class="footer-auth">
-            <a href="{{ url_for('user.user_login') }}" class="footer-link">Log In</a>
+            <a href="{{ url_for('user.login_page') }}" class="footer-link">Log In</a>
             <a href="{{ url_for('user.register_page') }}" class="footer-link">Sign Up</a>
           </div>
         </div>
@@ -194,7 +194,7 @@
       <hr class="mobile-nav-divider">
       <p class="mobile-nav-label">Account</p>
       <div class="mobile-nav-auth">
-        <a href="{{ url_for('user.user_login') }}" class="mobile-nav-auth-link">Log In</a>
+        <a href="{{ url_for('user.login_page') }}" class="mobile-nav-auth-link">Log In</a>
         <a href="{{ url_for('user.register_page') }}" class="mobile-nav-auth-link">Sign Up</a>
       </div>
     </div>

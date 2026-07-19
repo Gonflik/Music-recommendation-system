@@ -1026,7 +1026,52 @@ body.notebook-dark .notebook-ribbon-body {
   border-color: #555;
   box-shadow: -3px 3px 0 #000;
 }
+body.notebook-dark .navbar-bg {
+  filter: invert(1) brightness(0.6);
+}
 
+body.notebook-dark .logo {
+  isolation: isolate;
+  filter: none;
+}
+
+/* nav text */
+body.notebook-dark .nav-link,
+body.notebook-dark .nav-site-name {
+  color: #ccc;
+  -webkit-text-fill-color: #ccc;
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+}
+body.notebook-dark .footer-bg {
+  background: #1c1c1e;
+  border-color: #444;
+  box-shadow: 5px 5px 0 #000;
+}
+
+body.notebook-dark .footer-tagline,
+body.notebook-dark .footer-desc,
+body.notebook-dark .footer-credit {
+  color: #666;
+}
+
+body.notebook-dark .footer-link,
+body.notebook-dark .footer-social-link {
+  color: #ccc;
+  -webkit-text-fill-color: #ccc;
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+}
+
+body.notebook-dark .footer-group-label {
+  color: #555;
+}
+
+body.notebook-dark .footer-divider {
+  border-top-color: #333;
+}
 /* =============================================
    RESPONSIVE
    ============================================= */

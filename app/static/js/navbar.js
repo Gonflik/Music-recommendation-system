@@ -18,9 +18,20 @@ export function updateNav() {
     : `<a href="/users/login" class="mobile-nav-auth-link">Log In</a>
        <a href="/users" class="mobile-nav-auth-link">Sign Up</a>`;
 
+  // footer auth
+  const footerAuth = document.querySelector('.footer-auth');
+  if (footerAuth) {
+    footerAuth.innerHTML = loggedIn
+      ? `<a href="${profileHref}" class="footer-link">Profile</a>
+         <a href="#" class="footer-link" id="footerLogoutBtn">Log Out</a>`
+      : `<a href="/users/login" class="footer-link">Log In</a>
+         <a href="/users" class="footer-link">Sign Up</a>`;
+  }
+
   if (loggedIn) {
     document.getElementById('logoutBtn')?.addEventListener('click', logout);
     document.getElementById('logoutBtnMobile')?.addEventListener('click', logout);
+    document.getElementById('footerLogoutBtn')?.addEventListener('click', logout);
   }
 }
 
