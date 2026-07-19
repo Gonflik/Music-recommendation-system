@@ -158,8 +158,10 @@ class Album(Base):
         return album
     
     @classmethod
-    def get_popular(cls, limit: int):
+    def get_popular(cls, limit: int, genre: str = None):
         stmt = select(cls).options(selectinload(cls.songs), selectinload(cls.genres), joinedload(cls.artist)).order_by(cls.avg_rating.desc().nulls_last()).limit(limit)
+        if genre is not None:
+            stmt = stmt.where(cls.genres.any(Genre.name.ilike(f'%{genre}%')))
         result = db.session.scalars(stmt).unique().all()
         return result
 
