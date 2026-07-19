@@ -14,6 +14,14 @@ import { apiFetch } from "./api.js";
   backdrop.addEventListener('click', closeNav);
 })();
 
+export function redirectIfLoggedIn() {
+    const token = localStorage.getItem('access_token');
+    const authPaths = ['/users/login', '/users/register', '/users'];
+    if (token && authPaths.includes(location.pathname)) {
+        window.location.replace('/explore');
+    }
+}
+
 
 
 // ── Show/hide password ────────────────────────────
@@ -123,3 +131,5 @@ if (loginForm) {
         }
     });
 }
+
+redirectIfLoggedIn();
