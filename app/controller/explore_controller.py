@@ -17,7 +17,9 @@ def explore():
     if not user:
         return jsonify({"message": "User not found!"}), 404
 
-    popular_albums = Album.get_popular(limit=8)
+    genre_filter = request.args.get("genre", default=None, type=str)
+
+    popular_albums = Album.get_popular(limit=8, genre=genre_filter)
     recommendations = PropagandaDranika.get_recommendations(user.id, 5)
     if not recommendations:
         return jsonify({"message": "No recommendations!"}), 404

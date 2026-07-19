@@ -43,6 +43,21 @@ function escHtml(str) {
 // ───────────────────────────────────────────────
 // Genre + Search filters
 // ───────────────────────────────────────────────
+const GENRE_MAP = {
+  'rap':         'Rap/Hip Hop',
+  'rock':        'Rock',
+  'indie':       'Indie Rock',       
+  'pop':         'Pop',
+  'electronic':  'Electro',
+  'jazz':        'Jazz',
+  'classical':   'Classical',
+  'metal':       'Metal',
+  'folk':        'Folk',
+  'r&b':         'R&B',
+  'soul':        'Soul & Funk',
+  'dance':       'Dance',
+};
+
 let activeGenre = 'all';
 
 document.querySelectorAll('.pill').forEach(pill => {
@@ -50,19 +65,10 @@ document.querySelectorAll('.pill').forEach(pill => {
     document.querySelectorAll('.pill').forEach(p => p.classList.remove('pill-active'));
     pill.classList.add('pill-active');
     activeGenre = pill.dataset.genre;
-    applyGenreFilter();
+    loadExplore(activeGenre);          
   });
 });
 
-function applyGenreFilter() {
-  let visible = 0;
-  document.querySelectorAll('.album-card').forEach(card => {
-    const show = activeGenre === 'all' || card.dataset.genre.includes(activeGenre);
-    card.style.display = show ? '' : 'none';
-    if (show) visible++;
-  });
-  document.getElementById('searchNoResults').style.display = visible ? 'none' : 'block';
-}
 
 const trigger    = document.getElementById('searchTrigger');
 const expand     = document.getElementById('searchExpand');
@@ -202,39 +208,29 @@ function renderRecommendations(albums) {
 // Load page
 // ───────────────────────────────────────────────
 
-async function loadExplore() {
+async function loadExplore(genre = 'all') {
+  // show loading state
+  const popularGrid = document.getElementById('popularGrid');
+  const recommendGrid = document.getElementById('recommendGrid');
+  popularGrid.innerHTML   = '<p class="explore-loading">loading albums…</p>';
+  recommendGrid.innerHTML = '<p class="explore-loading">loading albums…</p>';
 
-    try {
+  try {
+    const genreParam = genre !== 'all' ? `?genre=${encodeURIComponent(GENRE_MAP[genre] ?? genre)}` : '';
+    const res = await apiFetch(`api/explore${genreParam}`);
 
-        const res = await apiFetch("api/explore");
+    if (!res.ok) throw new Error('API error');
 
-        if (!res.ok)
-            throw new Error("API error");
+    const data = await res.json();
 
-        const data = await res.json();
+    renderPopular(data.Popular);
+    renderRecommendations(data.Recommendations);
 
-        document.getElementById("popularLoading")?.remove();
-        document.getElementById("recommendLoading")?.remove();
-
-        renderPopular(data.Popular);
-
-        renderRecommendations(data.Recommendations);
-
-
-    }
-
-    catch (err) {
-
-        console.error(err);
-
-        document.getElementById("popularLoading").textContent =
-            "Couldn't load albums.";
-
-        document.getElementById("recommendLoading").textContent =
-            "Couldn't load recommendations.";
-
-    }
-
+  } catch (err) {
+    console.error(err);
+    popularGrid.textContent   = "Couldn't load albums.";
+    recommendGrid.textContent = "Couldn't load recommendations.";
+  }
 }
 import { updateNav } from './navbar.js';
 
