@@ -146,7 +146,7 @@ class PropagandaDranika:
         for album in candidates:
             if album.id in excluded_album_ids:
                 continue
-            if album.ghost_songs_count < 2:
+            if not album.ghost_songs_count or album.ghost_songs_count < 2:
                 continue
             super_final_results.append(album)
         return super_final_results

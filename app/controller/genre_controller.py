@@ -4,7 +4,7 @@ from app.model import Rating, User, Album, Song, Artist, Genre
 
 genre_bp = Blueprint('genre', __name__)
 
-@genre_bp.get('/genres/<int:genre_id>')
+@genre_bp.get('/api/genres/<int:genre_id>')
 def genre_show(genre_id):
     genre = Genre.get_by_id(genre_id)
     if not genre:
@@ -14,7 +14,7 @@ def genre_show(genre_id):
     return jsonify({"Genre": genre_dict})
 
 
-@genre_bp.get('/genres')
+@genre_bp.get('/api/genres')
 def genre_index():
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=5, type=int)
