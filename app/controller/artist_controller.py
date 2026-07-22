@@ -5,12 +5,6 @@ from app.model.action import ActionName, ReferenceClassName
 
 artist_bp = Blueprint('artist', __name__)
 
-@artist_bp.get('/artists')
-@jwt_required()
-def artist_index():
-    page = request.args.get('page', default=1, type=int)
-    per_page = request.args.get('per_page', default=5, type=int)
-
 
 @artist_bp.get('/artists/<int:artist_id>')
 def artist_show_page(artist_id):
