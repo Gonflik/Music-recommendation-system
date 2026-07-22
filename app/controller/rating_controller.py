@@ -139,12 +139,15 @@ def rating_create_for_song(artist_id, song_id):
 @rating_bp.patch('/api/users/me/ratings/<int:rating_id>')
 @jwt_required()
 def rating_update_put(rating_id):
-    if get_jwt_identity() != current_user.email:
-        return jsonify({"message": "You are not authorized to access this!"}), 401
-    
-    data = request.get_json()    
     rating = Rating.get_one_rating_by_id(rating_id)
 
+    if not rating:
+        return jsonify({"message": "Rating not found!"}), 404
+    
+    if rating.user_id != current_user.id:
+        return jsonify({"message": "You are not authorized to access this!"}), 403
+    
+    data = request.get_json()    
     success, errors = rating.update(data)
 
     if errors:
@@ -160,12 +163,14 @@ def rating_update_put(rating_id):
 @rating_bp.delete('/api/users/me/ratings/<int:rating_id>')
 @jwt_required()
 def rating_delete(rating_id):
-    if get_jwt_identity() != current_user.email:
-        return jsonify({"message": "You are not authorized to access this!"}), 401
-    
     rating = Rating.get_one_rating_by_id(rating_id)
+    
     if not rating:
-        return jsonify({"error": "Rating not found!"}), 404
+        return jsonify({"message": "Rating not found!"}), 404
+    
+    if rating.user_id != current_user.id:
+        return jsonify({"message": "You are not authorized to access this!"}), 403
+        
     success, response = rating.delete()
 
     status_code = response.pop('code')
