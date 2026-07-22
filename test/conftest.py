@@ -5,26 +5,24 @@ from app.model import Base
 from app import create_app, db
 from .factories import all_factories
 from types import SimpleNamespace
+import datetime
 
 
+#docker compose --profile test up -d db_test
 
+#docker compose --profile test stop db_test
 
 @pytest.fixture(scope="session")
 def app():
     params = {
         "SQLALCHEMY_ENGINES": {
-            "default": "postgresql+psycopg://testdranik:dranik322@localhost:5432/for_pytest"
+            "default": "postgresql+psycopg://testdranik:dranik322@localhost:5433/for_pytest"
         },
         "SECRET_KEY": "asdadadadadadada",
         "JWT_SECRET_KEY": "123sahfu2748fu1273y18y1diuhfhwd19828e19eu198e1298ssuf1283",
     }
     app = create_app(test_config=params)
     yield app
-
-@pytest.fixture(scope="function")
-def engine(app):
-    with app.app_context():
-        yield db.engine
     
 @pytest.fixture(scope="function")
 def client(app):
@@ -38,20 +36,16 @@ def setup_db(app):
         Base.metadata.drop_all(db.engine)
 
 @pytest.fixture(scope="function", autouse=True) #maybe delete autouse if something
-def db_session(app, engine):
-    connection = engine.connect()
-    transaction = connection.begin()
+def db_session(app):
+    with app.app_context():
+        yield db.session
+        db.session.rollback()
+        for table in reversed(Base.metadata.sorted_tables):
+            db.session.execute(table.delete())
+        db.session.commit()
 
-    session = db.session
-    session.bind = connection
     for factory_class in all_factories:
-        factory_class._meta.sqlalchemy_session = session
-
-    yield session
-
-    session.close()
-    transaction.rollback()
-    connection.close()
+        factory_class._meta.sqlalchemy_session = db.session
 
 
 @pytest.fixture
@@ -65,7 +59,7 @@ def mock_user_data():
 
 @pytest.fixture
 def auth_data(client, mock_user_data):
-    register_response = client.post('/users', data=json.dumps(mock_user_data), 
+    register_response = client.post('/api/users', data=json.dumps(mock_user_data), 
                            headers={"Content-Type": "application/json"})
     assert register_response.status_code == 201
     user_id = register_response.get_json().get('id')
@@ -74,7 +68,7 @@ def auth_data(client, mock_user_data):
         "email": "danylo@gmail.com",
         "password": "danylo12345"
     }
-    response = client.post('/users/login', data=json.dumps(login_data), headers={"Content-Type": "application/json"})
+    response = client.post('/api/users/login', data=json.dumps(login_data), headers={"Content-Type": "application/json"})
     assert response.status_code == 200
 
     data = response.get_json()
@@ -124,6 +118,7 @@ def mock_deezer_api_response_song(mock_deezer_client):
             name="Nujabes",
             id = 12317,
             picture = "https://fakeartistpicture.music.pictures",
+            nb_album = 6
         ),
         album=SimpleNamespace(
             title="Luv (sic) hexalogy",
@@ -145,8 +140,11 @@ def mock_deezer_api_response_song(mock_deezer_client):
         ],
         artist = SimpleNamespace(
             name = "Nujabes",
-            id = 12317
+            id = 12317,
+            nb_album = 7
         ),
+        release_date = datetime.date(2067, 4, 29),
+        record_type = "album",
     )
 
     mock_deezer_client.search.return_value = [fake_song]
@@ -171,7 +169,7 @@ def mock_deezer_api_response_album(mock_deezer_client):
         title = "If",
         id = 30212,
         duration = 2700,
-        cover = "https://somepicturetypeshit.music.com",
+        cover_xl = "https://somepicturetypeshit.music.com",
         nb_tracks = 6767,
         genres = [
             SimpleNamespace(name="Synth-punk", id=67)
@@ -180,7 +178,10 @@ def mock_deezer_api_response_album(mock_deezer_client):
             name = "Mindless Self Indulgence",
             id = 6767,
             picture = "https://msipictureshnee.com.music.com",
+            nb_album= 5,
         ),
+        release_date = datetime.date(2067, 4, 29),
+        record_type = "album"
     )
 
     mock_deezer_client.search_albums.return_value = [fake_album]
@@ -193,7 +194,7 @@ def mock_deezer_api_response_album_nujabes(mock_deezer_client):
         title = "Luv (sic) hexalogy",
         id = 6246234,
         duration = 2700,
-        cover = "https://somepicturetypeshit.music.com",
+        cover_xl = "https://somepicturetypeshit.music.com",
         nb_tracks = 6767,
         genres = [
             SimpleNamespace(name="Hip-hop", id=52)
@@ -203,6 +204,8 @@ def mock_deezer_api_response_album_nujabes(mock_deezer_client):
             id = 12317,
             picture = "https://msipictureshnee.com.music.com",
         ),
+        release_date = datetime.date(2008, 4, 29),
+        record_type = "album"
     )
 
     mock_deezer_client.search_albums.return_value = [fake_album]
