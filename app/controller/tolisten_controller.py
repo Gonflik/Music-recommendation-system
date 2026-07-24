@@ -43,20 +43,23 @@ def tolisten_add_album_to_user():
     if not album:
         return jsonify({"message": "Album not found!"}), 404
     
-
+    if ToListen.exists_for_user(current_user.id, album_id):
+            return jsonify({"error": "Yo already have this album in tolisten!"}), 409
+    
     tolisten_entry = ToListen(note=note, user_id=current_user.id, album_id=album_id)
     tolisten_entry.save()
+    
 
     Action.create_or_increment(name=ActionName.ADD_TO_LISTEN ,user_id=current_user.id, reference_id=album_id, reference_name=ReferenceClassName.ALBUM)
 
-    return jsonify({"message": "Album succesfully added!"}), 201
+    return jsonify({"message": "Album succesfully added!", "tolisten_id": tolisten_entry.id}), 201
     
 @tolisten_bp.delete('/api/tolisten/<int:tolisten_id>')
 @jwt_required()
 def tolisten_delete_album(tolisten_id):
-    data = request.get_json()
-
     entry = ToListen.get_one_tolisten_by_id(tolisten_id)
+    if entry.user_id != current_user.id:
+        return jsonify({"message": "You are not authorized to access this!"}), 403
     if entry:
         entry.delete()
         return jsonify({"message": "ToListen entry deleted successfully!"}), 200
@@ -69,8 +72,13 @@ def tolisten_update_note(tolisten_id):
     data = request.get_json()
     
     entry = ToListen.get_one_tolisten_by_id(tolisten_id)
+    
     if not entry:
         return jsonify({"message": "No ToListen entry with such id!"}), 404
+    
+    if entry.user_id != current_user.id:
+        return jsonify({"message": "You are not authorized to access this!"}), 403
+    
     note = data.get('note')
     if "note" in data:  
         entry.note = note
