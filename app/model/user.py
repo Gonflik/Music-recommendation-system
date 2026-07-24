@@ -192,6 +192,7 @@ class User(Base):
         new_age = data.get('age')
         new_gender = data.get('gender')
         new_location = data.get('location')
+        new_bio = data.get('bio')
 
         if new_name is not None:
             self.name = new_name
@@ -204,6 +205,9 @@ class User(Base):
         
         if new_location is not None:
             self.location = new_location
+
+        if new_bio is not None:
+                    self.bio = new_bio
 
         if len(self.errors) > 0:
             return False, {"error": self.errors, "code": 400}
