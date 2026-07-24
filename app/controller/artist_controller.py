@@ -38,10 +38,10 @@ def artist_show(artist_id):
         top_songs = [i.to_dict() for i in top_songs] if top_songs else []
         all_albums = [i.to_dict() for  i in all_albums] if all_albums else []
 
-        redis_client.setex(cache_key, ARTIST_TTL, json.dumps(
+        redis_client.set(cache_key, json.dumps(
                         {"Top_songs": top_songs,
                          "total_top_songs": all_top,
-                         "Albums": all_albums}))
+                         "Albums": all_albums}), ex=ARTIST_TTL)
 
     for album in all_albums:
         album["in_tolisten"] = ToListen.exists_for_user(current_user.id, album["id"])

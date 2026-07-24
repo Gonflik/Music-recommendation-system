@@ -4,6 +4,7 @@ import datetime
 from unittest.mock import patch, MagicMock
 from app.model import Base, Album, Artist
 from app import create_app, db
+from app.extensions import redis_client
 from .factories import all_factories
 from types import SimpleNamespace
 from sqlalchemy import select
@@ -44,6 +45,7 @@ def db_session(app):
         for table in reversed(Base.metadata.sorted_tables):
             db.session.execute(table.delete())
         db.session.commit()
+        redis_client.flushdb()
 
     for factory_class in all_factories:
         factory_class._meta.sqlalchemy_session = db.session

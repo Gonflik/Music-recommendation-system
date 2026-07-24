@@ -42,10 +42,11 @@ def search():
         songs = [song.to_dict() for song in songs] if songs else songs
         albums = [album.to_dict() for album in albums] if albums else albums
         
-        redis_client.setex(cache_key, SEARCH_TTL, json.dumps(
+        redis_client.set(cache_key, json.dumps(
                 {"Artists": artists,
                  "Songs": songs,
-                 "Albums": albums}))
+                 "Albums": albums}),
+                 ex=SEARCH_TTL)
     
     
     for album in albums:

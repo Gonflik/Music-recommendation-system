@@ -40,5 +40,5 @@ def song_preview(song_id):
     if not preview_url:
         return jsonify({"error": "No preview available"}), 404
     
-    redis_client.setex(cache_key, PREVIEW_TTL, preview_url)
+    redis_client.set(cache_key, preview_url, ex=PREVIEW_TTL)
     return jsonify({"preview_url": preview_url})

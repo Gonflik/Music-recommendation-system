@@ -6,6 +6,7 @@ def test_create_rating_album_successfull(client, auth_data, db_session, mock_dee
     headers = auth_data['headers']
     
     client.get('/api/search?q=If', headers=headers)
+
     album = db_session.execute(
         select(Album).where(Album.dzid == 30212)
     ).scalar_one_or_none()
