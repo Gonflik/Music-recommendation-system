@@ -64,7 +64,7 @@ class Artist(Base):
         stmt = select(cls).limit(per_page).offset((page-1) * per_page)
         result = db.session.scalars(stmt).all()
         return result
-    #------------------------------------------------------------------------------------------------------------------------
+
     def get_top_songs_deezer(self, limit: int):
         from .song import Song
         from app.services.deezer_client import DEEZNUTSAPI
@@ -84,7 +84,7 @@ class Artist(Base):
         artist_list = Artist.write_artist(artists)
         result = Album.write_albums(albums, artist_list)
         return result
-    #------------------------------------------------------------------------------------------------------------------------
+    
     @classmethod
     def write_artist(cls, artist_data):
         result: list[Artist] = []

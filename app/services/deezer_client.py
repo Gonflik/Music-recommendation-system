@@ -7,7 +7,7 @@ class DEEZNUTSAPI:
     def get_artist_by_name(query: str, per_page: int, page: int) -> list[dict]:
         with deezer.Client() as client:
             artists = client.search_artists(query=query)
-            paginated_artists = DEEZNUTSAPI.paginate(artists, per_page, page) #additional calls may be issued here!
+            paginated_artists = DEEZNUTSAPI.paginate(artists, per_page, page)
             formatted_artists = DEEZNUTSAPI._format_artist(artists_data=paginated_artists)
             return formatted_artists
 
@@ -77,7 +77,6 @@ class DEEZNUTSAPI:
             })
         return result
     
-    #search + return mapped data
     def _format_song_with_its_artist_and_album(client, song_data, no_album: dict = {}, include_track_position: bool = False, known_artist = None):
         formatted_songs = []
         for song in song_data:
@@ -128,7 +127,6 @@ class DEEZNUTSAPI:
         return formatted_albums, formatted_artists
 
 
-    #mappers that return parsed lists of data for a given song
     def map_artists_of_songs(client, songs: list["songs"], known_artist = None):
         mapped_artists = []
         artist_id_cache = []
@@ -174,8 +172,8 @@ class DEEZNUTSAPI:
                         "picture": song.album.cover_xl,
                         "genres": [],
                         "ghost_songs_count": None,
-                        "release_date": None,       # fixed
-                        "release_type": None,       # fixed
+                        "release_date": None,       
+                        "release_type": None,       
                         "artist_name": song.artist.name,
                         "artist_dzid": song.artist.id,
                         "artist_picture": song.artist.picture,

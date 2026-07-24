@@ -159,7 +159,6 @@ def rating_update_put(rating_id):
                     }), 200
 
 
-#shota vpadlu, potim shne)
 @rating_bp.delete('/api/users/me/ratings/<int:rating_id>')
 @jwt_required()
 def rating_delete(rating_id):

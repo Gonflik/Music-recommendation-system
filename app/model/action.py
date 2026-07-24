@@ -10,8 +10,8 @@ from sqlalchemy import select
 
 class ActionName(str, enum.Enum):
     ALBUM_SHOW = "album_show"
-    ARTIST_SHOW = "artist_show" #non-existent yet
-    ADD_TO_LISTEN = "add_to_listen" #make polymorph
+    ARTIST_SHOW = "artist_show"
+    ADD_TO_LISTEN = "add_to_listen"
     RATE_ALBUM = "rate_album"
     RATE_SONG = "rate_song"
 

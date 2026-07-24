@@ -6,8 +6,6 @@ from app.model.user import GenderEnum
 user_bp = Blueprint('user',__name__)
 
 
-#mozna zrobit decorator yakii bude chekat chi user ADMIN, abo prosto if else if else
-
 @user_bp.get('/users')
 def register_page():
     return render_template("register.html")

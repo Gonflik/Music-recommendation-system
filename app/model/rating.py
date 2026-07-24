@@ -178,7 +178,6 @@ class Rating(Base):
         db.session.commit()
         return True, {"message" : "Rating deleted successfully!", "code": 200}
 
-    #should only be used after the def get_rating functions
     def to_dict(self):
         target = self.album if self.album else self.song
 

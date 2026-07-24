@@ -29,7 +29,6 @@ class Album(Base):
         .correlate_except(Rating)
         .scalar_subquery()
     )
-    #maybe add count of the total ratings
     artist_id: Mapped[int] = mapped_column(ForeignKey("artist.id"))
 
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
@@ -77,7 +76,6 @@ class Album(Base):
             for art in artist_list:
                 if item.get("artist_dzid") == art.dzid:
                     album_artist_id = art.id
-            #-------------------------------------------------------------------------------------------------
             if album_artist_id is None:
                 from app.model.artist import Artist
                 fallback = db.session.execute(
@@ -95,7 +93,6 @@ class Album(Base):
                     db.session.flush()
 
                 album_artist_id = fallback.id
-            #-------------------------------------------------------------------------------------------------
             album_genre = Genre.write_genre(genre_data=item.get('genres'))         
             new_album = Album(
                 name = item.get('name'),
@@ -178,7 +175,7 @@ class Album(Base):
         from ..services.deezer_client import DEEZNUTSAPI
         stmt = select(cls).where(
             cls.name.ilike(f"%{query}%"),
-        ).limit(per_page).offset((page-1) * per_page) #injection REVIEW
+        ).limit(per_page).offset((page-1) * per_page)
         result = db.session.scalars(stmt).all()
         if not result:
             albums, artists = DEEZNUTSAPI.get_album_by_name(query=query, per_page=per_page, page=page)

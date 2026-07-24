@@ -61,7 +61,6 @@ class User(Base):
         CheckConstraint("LENGTH(location) > 1", name="ck_user_location_length")
     )
 
-    #validators
     @validates('email')
     def validate_email(self, key, address):
         if '@' not in address:
@@ -109,7 +108,6 @@ class User(Base):
                 self.errors.append(f"{gender} is not a viable gender option")
         return gender
     
-    #get methods/select queries
     @classmethod
     def get_user_by_email(cls, email: str):
         stmt = select(cls).where(cls.email==email)
@@ -128,7 +126,6 @@ class User(Base):
         result = db.session.scalars(stmt).all()
         return result
 
-    #useful methods
     def save(self):
         db.session.add(self)
         db.session.commit()

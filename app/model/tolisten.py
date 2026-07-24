@@ -19,7 +19,6 @@ class ToListen(Base):
     note: Mapped[str] = mapped_column(String(300))
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     album_id: Mapped[int] = mapped_column(ForeignKey("album.id"))
-    #object_type: Mapped[ObjectType] = mapped_column()
 
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
@@ -32,7 +31,7 @@ class ToListen(Base):
     __table_args__ = (
         UniqueConstraint('user_id', 'album_id', name="uq_tolisten_albumid_userid"),
     )
-    #can be optimized, load_only() for artist,album
+
     @classmethod
     def get_all_join_album_join_artist_by_user_id(cls,user_id): 
         stmt = select(cls).where(cls.user_id== user_id).options(joinedload(cls.album).joinedload(Album.artist), joinedload(cls.album).selectinload(Album.genres))
