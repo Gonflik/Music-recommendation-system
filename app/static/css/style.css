@@ -1,0 +1,818 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  background: #ffffff;
+  font-family: 'Indie Flower', cursive;
+  overflow-x: hidden;
+  color: #000;
+}
+
+/* =========================
+   SINGLE PAGE GRID
+========================= */
+
+.page-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.page-grid::before,
+.page-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 92, 92, 0.34) 0%,
+    rgba(255, 110, 110, 0.32) 28%,
+    rgba(228, 168, 92, 0.31) 68%,
+    rgba(196, 176, 96, 0.34) 100%
+  );
+}
+
+.page-grid::before {
+  -webkit-mask-image: repeating-linear-gradient(
+    to right,
+    #000 0 1px,
+    transparent 1px 125px
+  );
+  mask-image: repeating-linear-gradient(
+    to right,
+    #000 0 1px,
+    transparent 1px 125px
+  );
+}
+
+.page-grid::after {
+  -webkit-mask-image: repeating-linear-gradient(
+    to bottom,
+    #000 0 1px,
+    transparent 1px 125px
+  );
+  mask-image: repeating-linear-gradient(
+    to bottom,
+    #000 0 1px,
+    transparent 1px 125px
+  );
+}
+
+/* =========================
+   PAGE LAYOUT
+========================= */
+
+.page-content {
+  position: relative;
+  z-index: 1;
+}
+
+.frame {
+  position: relative;
+  width: 100%;
+  background: transparent;
+}
+
+.frame-inner {
+  position: relative;
+  width: 1440px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.frame-1 {
+  min-height: 800px;
+}
+
+.frame-2 {
+  min-height: 0px;
+}
+
+.frame-1 .frame-inner {
+  min-height: 800px;
+}
+
+.frame-2 .frame-inner {
+  min-height: 0px;
+}
+
+/* =========================
+   FRAME 1
+========================= */
+
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 760px;
+}
+
+.hero-text-block {
+  position: absolute;
+  width: 709px;
+  height: 267px;
+  left: 28px;
+  top: 18px;
+}
+
+.text-highlight {
+  position: absolute;
+  background: #fff;
+}
+
+.rect-4 {
+  width: 676px;
+  height: 73px;
+  left: 0;
+  top: 0;
+}
+
+.rect-5 {
+  width: 699px;
+  height: 73px;
+  left: 0;
+  top: 90px;
+}
+
+.rect-6 {
+  width: 565px;
+  height: 73px;
+  left: 0;
+  top: 182px;
+}
+
+.hero-title {
+  position: absolute;
+  left: 5px;
+  top: -8px;
+  width: 704px;
+  font-size: 64px;
+  line-height: 93px;
+  font-weight: 400;
+  color: #000;
+  z-index: 2;
+}
+
+.cta-block {
+  position: absolute;
+  width: 385px;
+  height: 163px;
+  left: 163px;
+  top: 338px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .15s ease;
+}
+
+.cta-block:hover {
+  transform: translate(-2px, -2px);
+}
+
+.cta-block:active {
+  transform: translate(1px, 1px);
+}
+
+.cta-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: filter .15s ease;
+}
+
+
+.cta-text {
+  position: relative; 
+  left: unset;
+  top: unset;
+  text-decoration: none;
+  font-size: 60px;
+  line-height: 88px;
+  font-weight: 400;
+  background: linear-gradient(90deg, #E96F4C 0%, #354D60 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: opacity .15s ease;
+}
+
+.cta-block:hover .cta-text {
+  opacity: 0.85;
+}
+
+.hero-image-block {
+  position: absolute;
+  width: 849px;
+  height: 667px;
+  right: -75px;
+  top: -55px;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: opacity .3s ease;
+}
+
+.hero-image-rock {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+
+.hero-image-block:hover .hero-image {
+  opacity: 0;
+}
+
+.hero-image-block:hover .hero-image-rock {
+  opacity: 1;
+}
+
+/* =========================
+   FRAME 2
+========================= */
+
+.frame-2-inner {
+  position: relative;
+}
+
+.top-rated-title-block {
+  position: absolute;
+  width: 309px;
+  height: 111px;
+  left: 565px;
+  top: -8px;
+}
+
+.title-bg {
+  position: absolute;
+  width: 276px;
+  height: 78px;
+  left: 16px;
+  top: 18px;
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 18px;
+}
+
+.top-rated-title {
+  position: absolute;
+  width: 293px;
+  height: 100px;
+  left: 8px;
+  top: 18px;
+  font-size: 48px;
+  line-height: 70px;
+  font-weight: 400;
+  text-align: center;
+  background: linear-gradient(180deg, #000000 0%, #E8B857 77.4%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0px 4px 6.2px rgba(0, 0, 0, 0.25);
+}
+
+.top-rated-grid {
+  position: relative;
+  width: 100%;
+  min-height: 0;
+}
+
+/* cards */
+
+.song-card {
+  position: absolute;
+  width: 556px;
+  height: 313px;
+}
+
+.card-bg {
+  position: absolute;
+  left: 6px;
+  top: 14px;
+  width: 546px;
+  height: 299px;
+  background: #ffffff;
+  border-radius: 82px;
+}
+
+.card-outline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.album-cover {
+  position: absolute;
+  width: 153px;
+  height: 153px;
+  left: 53px;
+  top: 36px;
+  object-fit: cover;
+  border-radius: 16px;
+  display: block;
+}
+
+.song-title {
+  position: absolute;
+  left: 235px;
+  top: 34px;
+  width: 255px;
+  font-size: 44px;
+  line-height: 54px;
+  font-weight: 400;
+  color: #000000;
+}
+
+.artist-name {
+  position: absolute;
+  left: 238px;
+  top: 136px;
+  font-size: 28px;
+  line-height: 40px;
+  font-weight: 400;
+  color: #3A3939;
+}
+
+.rating-row {
+  position: absolute;
+  left: 44px;
+  right: 39px;
+  bottom: 38px;
+  height: 70px;
+}
+
+.star-box {
+  position: absolute;
+  width: 53px;
+  height: 50px;
+  left: 24px;
+  top: 7px;
+  background: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 6px;
+}
+
+.score-star {
+  position: absolute;
+  left: 26px;
+  top: -2px;
+  font-size: 52px;
+  line-height: 1;
+  color: #000;
+  z-index: 2;
+}
+
+.rating-bg {
+  position: absolute;
+  width: 187px;
+  height: 100px;
+  left: 0;
+  top: -10px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.rating-score {
+  position: absolute;
+  left: 102px;
+  top: 4px;
+  font-size: 40px;
+  line-height: 58px;
+  font-weight: 400;
+  color: #000000;
+}
+
+.ratings-count {
+  position: absolute;
+  left: 186px;
+  top: 12px;
+  font-size: 30px;
+  line-height: 44px;
+  font-weight: 400;
+  color: #3A3939;
+}
+
+.song-length {
+  position: absolute;
+  right: 0;
+  top: 2px;
+  font-size: 48px;
+  line-height: 70px;
+  font-weight: 400;
+  color: #000000;
+}
+
+/* positions */
+
+.card-1 {
+  left: 83px;
+  top: 120px;
+}
+
+.card-2 {
+  left: 766px;
+  top: 120px;
+}
+
+.card-3 {
+  left: 83px;
+  top: 455px;
+}
+
+.card-4 {
+  left: 776px;
+  top: 455px;
+}
+
+/* tweaks */
+
+.card-1 .card-bg {
+  width: 534px;
+  height: 289px;
+  left: 7px;
+  top: 12px;
+}
+
+.card-1 .song-title {
+  width: 310px;
+  font-size: 38px;
+  line-height: 50px;
+  top: 30px;
+}
+
+.card-1 .artist-name {
+  top: 142px;
+}
+
+.card-1 .song-length {
+  font-size: 40px;
+  line-height: 58px;
+  top: 10px;
+}
+
+.card-1 .rating-score {
+  top: 6px;
+}
+
+.card-1 .ratings-count {
+  top: 10px;
+}
+
+.card-2 .card-bg {
+  width: 548px;
+  height: 298px;
+  left: 4px;
+  top: 10px;
+}
+
+.card-2 .song-title {
+  width: 210px;
+  top: 42px;
+}
+
+.card-2 .artist-name {
+  top: 148px;
+}
+
+.card-2 .album-cover {
+  width: 151px;
+  height: 151px;
+}
+
+.card-3 .song-title {
+  width: 210px;
+  top: 42px;
+}
+
+.card-3 .artist-name {
+  top: 148px;
+}
+
+.card-3 .rating-score {
+  width: 59px;
+}
+
+.card-4 .card-bg {
+  width: 547px;
+  height: 299px;
+  left: 5px;
+  top: 14px;
+  border-radius: 86px;
+}
+
+.card-4 .song-title {
+  width: 250px;
+  top: 36px;
+}
+
+.card-4 .artist-name {
+  width: 250px;
+  top: 142px;
+}
+
+.card-4 .rating-score {
+  width: 63px;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.site-footer {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 0 20px 32px;
+  margin-top: 60px;
+}
+
+.footer-inner {
+  position: relative;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 48px 80px 36px;
+}
+
+.footer-bg {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  border: 2.5px solid #000;
+  border-radius: 32px;
+  box-shadow: 5px 5px 0 #000;
+  transform: rotate(-0.25deg);
+}
+
+.footer-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.footer-logo-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 220px;
+}
+
+.footer-logo {
+  width: 52px;
+  height: 47px;
+  object-fit: contain;
+}
+
+.footer-tagline {
+  font-size: 22px;
+  color: #444;
+  font-family: 'Indie Flower', cursive;
+}
+
+.footer-desc {
+  font-size: 16px;
+  color: #888;
+  font-family: 'Indie Flower', cursive;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.footer-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-group-label {
+  font-size: 14px;
+  font-family: 'Indie Flower', cursive;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 2px;
+}
+
+.footer-links,
+.footer-auth,
+.footer-about-links {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.footer-link {
+  text-decoration: none;
+  font-size: 24px;
+  color: #000;
+  font-family: 'Indie Flower', cursive;
+  transition: opacity 0.15s;
+}
+
+.footer-link:hover { opacity: 0.6; }
+
+.footer-divider {
+  position: relative;
+  z-index: 1;
+  margin-top: 32px;
+  border: none;
+  border-top: 1.5px dashed #ccc;
+}
+
+.footer-bottom-row {
+  position: relative;
+  z-index: 1;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-credit {
+  font-size: 16px;
+  color: #aaa;
+  font-family: 'Indie Flower', cursive;
+}
+
+.footer-social {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.footer-social-link {
+  text-decoration: none;
+  font-size: 22px;
+  color: #666;
+  font-family: 'Indie Flower', cursive;
+  transition: color 0.15s, transform 0.15s;
+  display: inline-block;
+}
+
+.footer-social-link:hover {
+  color: #000;
+  transform: scale(1.15);
+}
+
+/* =========================
+   RESPONSIVE (base rules)
+========================= */
+
+@media (max-width: 1440px) {
+  .site-navbar {
+    width: calc(100% - 24px);
+  }
+
+  .frame-inner {
+    width: 100%;
+  }
+}
+
+/* =========================
+   TOP-RATED TOLISTEN-STYLE CARDS
+========================= */
+
+.tr-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 80px 80px;
+  padding: 180px 80px 80px;
+}
+
+.tr-item {
+  display: flex;
+  flex-direction: column;
+}
+
+/* card body */
+.tr-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: transform 0.15s;
+  min-height: 200px;
+}
+.tr-card:hover { transform: translateY(-4px) rotate(0.5deg); }
+
+.tr-card-bg {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  border: 2.5px solid #000;
+  border-radius: 24px;
+  box-shadow: 5px 5px 0 #000;
+}
+
+/* each card tilted differently */
+.tr-item:nth-child(1) .tr-card-bg { transform: rotate(-1.2deg); }
+.tr-item:nth-child(2) .tr-card-bg { transform: rotate(0.8deg); }
+.tr-item:nth-child(3) .tr-card-bg { transform: rotate(-0.4deg); }
+.tr-item:nth-child(4) .tr-card-bg { transform: rotate(1.5deg); }
+
+.tr-cover-wrap {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 180px;
+  padding: 16px 0 16px 16px;
+}
+.tr-cover {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1.5px solid #ddd;
+  display: block;
+}
+
+.tr-meta {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  padding: 12px 12px;
+}
+.tr-title {
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1.25;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tr-artist {
+  font-size: 22px;
+  color: #555;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* each note tilted differently - removed, notes merged into card */
+
+.note-yellow { background: #fffde7; }
+.note-green  { background: #e8f5e9; }
+.note-pink   { background: #fce4ec; }
+.note-blue   { background: #e3f2fd; }
+
+.tr-rating-row {
+  position: relative;
+  z-index: 1;
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 0 18px 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.tr-score {
+  font-size: 40px;
+  font-weight: 400;
+  color: #000;
+}
+.tr-count {
+  font-size: 22px;
+  color: #444;
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .tr-grid { grid-template-columns: 1fr; padding: 40px 20px 60px; }
+}

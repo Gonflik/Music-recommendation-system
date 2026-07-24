@@ -1,8 +1,4 @@
-.env
-<<<<<<< HEAD
+docker-compose.yml
+Dockerfile
 __pycache__/
 .venv/
-=======
-.venv
-__pycache__/
->>>>>>> main

@@ -1,11 +1,11 @@
+import datetime
 from .base import Base
 from .rating import Rating #!!!
 from .artist import Artist
 from .album import Album
-from .associations.playlist_song_association import playlist_song_association
 from .associations.artist_song_association import artist_song_association
-from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, Session
-from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, event, BigInteger
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property, validates, joinedload, Session, selectinload
+from sqlalchemy import String, ForeignKey, func, select, CheckConstraint, event, BigInteger, DateTime
 from typing import List, Optional
 from app import db
 from ..services import DEEZNUTSAPI
@@ -17,29 +17,35 @@ class Song(Base):
     dzid: Mapped[int] = mapped_column(BigInteger, unique=True)
     name: Mapped[str] = mapped_column(String(100))
     length: Mapped[int]
-    song_position: Mapped[int]
+    song_position: Mapped[int | None]
     picture: Mapped[str]
-    preview: Mapped[str]
+    preview: Mapped[str | None]
     avg_rating = column_property(
         select(func.avg(Rating.score)).where(Rating.song_id == id).correlate_except(Rating).scalar_subquery()
     )
+    rating_count = column_property(
+        select(func.count(Rating.id))
+        .where(Rating.song_id == id)
+        .correlate_except(Rating)
+        .scalar_subquery()
+    )
     
     album_id: Mapped[int | None] = mapped_column(ForeignKey("album.id"))
+
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
+
 
     artist: Mapped[List["Artist"]] = relationship(
         secondary=artist_song_association,
         back_populates="songs",
     )
     album: Mapped["Album"] = relationship(back_populates="songs")
-    playlists: Mapped[List["Playlist"]] = relationship(
-        secondary=playlist_song_association,
-        back_populates="songs",
-    )
     ratings: Mapped[List["Rating"]] = relationship(back_populates="song")
 
     __table_args__ = (
         CheckConstraint("LENGTH(name) > 0", name="ck_name_length"),
-        CheckConstraint("length > 30", name="ck_length_value"), 
+        CheckConstraint("length > 5", name="ck_length_value"), 
     )
 
     @validates('name')
@@ -50,8 +56,8 @@ class Song(Base):
     
     @validates('length')
     def validate_length(self,key, length):
-        if length < 30:
-            raise ValueError("Song too short(min length 30s)")
+        if length < 5:
+            raise ValueError("Song too short(min length 5s)")
         return length
 
     @event.listens_for(Session, "before_flush")
@@ -68,11 +74,17 @@ class Song(Base):
         return song
 
     @classmethod
-    def search_for_song_by_query(cls, query):
-        stmt = select(cls).options(joinedload(cls.artist)).where(cls.name.ilike(f"%{query}%")).limit(10)
+    def get_top_songs(cls, limit: int):
+        stmt = select(cls).options(joinedload(cls.artist), selectinload(cls.album)).order_by(cls.avg_rating.desc().nulls_last(), cls.rating_count.desc()).limit(limit)
+        result = db.session.scalars(stmt).unique().all()
+        return result
+
+    @classmethod
+    def search_for_song_by_query(cls, query, per_page: int, page: int):
+        stmt = select(cls).options(joinedload(cls.artist), selectinload(cls.album)).where(cls.name.ilike(f"%{query}%")).limit(per_page).offset((page-1) * per_page)
         result = db.session.scalars(stmt).unique().all()
         if not result:
-            songs, albums, artists = DEEZNUTSAPI.get_song_by_name(query=query) 
+            songs, albums, artists = DEEZNUTSAPI.get_song_by_name(query=query, per_page=per_page, page=page) 
             if not songs:
                 return []
             result = Song.write_songs_with_artists_and_albums(song_data=songs, artist_data=artists, album_data=albums)
@@ -83,9 +95,7 @@ class Song(Base):
     def write_songs_with_artists_and_albums(cls, song_data, artist_data, album_data):
         result: list[Song] = []
         artists = Artist.write_artist(artist_data)
-        print("ARTISTS WRITTEN:", [artist.to_dict() for artist in artists])
         albums = Album.write_albums(album_data=album_data, artist_list=artists)
-        print("ALBUMS WRITTEN:", [album.to_dict() for album in albums])
         for item in song_data:
         
             existing_song = db.session.execute(
@@ -93,6 +103,8 @@ class Song(Base):
             ).scalar_one_or_none()
             
             if existing_song:
+                if item.get('song_position') is not None:
+                    existing_song.song_position = item['song_position']
                 result.append(existing_song)
                 continue
 
@@ -116,9 +128,6 @@ class Song(Base):
                 if art.dzid == item.get('artist_dzid'):
                     artist = art
 
-            print("MATCH SONG ITEM:", item)
-            print("MATCHED ARTIST:", artist)
-            print("MATCHED ALBUM ID:", song_album_id)
             new_song.artist.append(artist)
             
             result.append(new_song)
@@ -137,7 +146,9 @@ class Song(Base):
             "length": self.length,
             "song_position": self.song_position,
             "picture": self.picture,
-            "preview": self.preview,
+            "preview": self.preview if self.preview else None,
+            "avg_rating": (float(str(self.avg_rating)[:4]) if self.avg_rating else None),
+            "rating_count": self.rating_count,
             "artist_name": self.artist[0].name,
             "artist_id": self.artist[0].id,
             "album_name": self.album.name if self.album else None,

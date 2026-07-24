@@ -2,15 +2,29 @@ from flask import Flask, jsonify
 from .extensions import db, jwt
 from .model.base import Base
 from .model import User, TokenBlocklist
+from .controller.genre_controller import genre_bp
 from .controller.user_controller import user_bp
 from .controller.tolisten_controller import tolisten_bp
 from .controller.rating_controller import rating_bp
 from .controller.search_controller import search_bp
+from .controller.album_controller import album_bp
+from .controller.explore_controller import explore_bp
+from .controller.artist_controller import artist_bp
+from .controller.song_controller import song_bp
+from flask_migrate import Migrate
 
-
+import logging
+from .errors import register_error_handler
 
 def create_app(test_config=None):
     app = Flask(__name__)
+
+    if not app.debug:
+        logging.basicConfig(
+            filename='app.log',
+            level=logging.ERROR,
+            format='%(asctime)s %(levelname)s: %(message)s'
+        )
 
     if test_config:
         app.config.update(test_config)
@@ -20,17 +34,19 @@ def create_app(test_config=None):
     
     db.init_app(app)
     jwt.init_app(app)
+    register_error_handler(app)
     
-    app.register_blueprint(user_bp)
-    app.register_blueprint(tolisten_bp)
-    app.register_blueprint(rating_bp)
-    app.register_blueprint(search_bp)
+    all_bp = [user_bp, tolisten_bp, rating_bp, search_bp, genre_bp, album_bp, explore_bp, artist_bp, song_bp]
+    for bp in all_bp:
+        app.register_blueprint(bp)
 
-    if test_config:
-        pass
-    else:
-        with app.app_context(): 
-            Base.metadata.create_all(db.engine)        
+    # if test_config:
+    #     pass
+    # else:
+    #     with app.app_context(): 
+    #         Base.metadata.create_all(db.engine)        
+
+    migrate = Migrate(app=app, db=db)
 
     #jwt user loader
     @jwt.user_lookup_loader

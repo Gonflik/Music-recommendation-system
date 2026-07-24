@@ -8,7 +8,7 @@ class TokenBlocklist(Base):
     __tablename__ = 'tokenblocklist'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    jti: Mapped[str] = mapped_column(index=True) #mb yak uuid zberigat, posgresql supports
+    jti: Mapped[str] = mapped_column(index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     @classmethod

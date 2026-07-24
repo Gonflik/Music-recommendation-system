@@ -6,5 +6,4 @@ album_genre_association = Table(
     Base.metadata,
     Column("album_id", ForeignKey("album.id"), primary_key=True),
     Column("genre_id", ForeignKey("genre.id"), primary_key=True),
-    UniqueConstraint('album_id', 'genre_id', name='uq_album_genre'),
 )

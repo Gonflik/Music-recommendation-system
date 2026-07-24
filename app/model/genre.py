@@ -1,9 +1,10 @@
+import datetime
 from .base import Base
 from app import db
 from.associations.album_genre_association import album_genre_association
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload, joinedload
 from typing import List
-from sqlalchemy import select 
+from sqlalchemy import select, func, DateTime
 
 
 class Genre(Base):
@@ -13,13 +14,16 @@ class Genre(Base):
     dzid: Mapped[int] = mapped_column(unique=True)
     name: Mapped[str]
 
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
+
     albums: Mapped[List["Album"]] = relationship(
         secondary=album_genre_association,
         back_populates="genres"
     )
 
     @classmethod
-    def write_genre(cls, genre_data) -> Genre:
+    def write_genre(cls, genre_data):
         result: list[Genre] = []
         for item in genre_data:
             genre_dzid = item.get('dzid')
@@ -38,6 +42,26 @@ class Genre(Base):
             result.append(new_genre)
         return result
 
+    def get_by_id(genre_id):
+        from .album import Album
+        from .artist import Artist
+        stmt = select(Genre).where(Genre.id==genre_id).options(selectinload(Genre.albums).joinedload(Album.artist))
+        genres = db.session.scalar(stmt)
+        return genres
+
+    def get_all(per_page: int, page: int):
+        from .album import Album
+        from .artist import Artist
+        if page <= 0 or per_page <= 0:
+            return None
+        stmt = select(Genre).options(selectinload(Genre.albums).joinedload(Album.artist)).limit(per_page).offset((page-1) * per_page)
+        genres = db.session.scalars(stmt).unique().all()
+        return genres
+
 
     def to_dict(self):
-        return {"name": self.name, "dzid": self.dzid, "id": self.id}
+        return {
+            "name": self.name,
+            "id": self.id,
+            "dzid": self.dzid,
+        }

@@ -1,7 +1,8 @@
 import enum
+import datetime
 from .base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates, reconstructor
-from sqlalchemy import String, ForeignKey, Enum, CheckConstraint, select
+from sqlalchemy import String, ForeignKey, Enum, CheckConstraint, select, func, DateTime
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
 from app.extensions import db
@@ -28,6 +29,7 @@ class User(Base):
         nullable=False,
         default=UserRole.USER,
     )
+    bio: Mapped[str | None] = mapped_column(String(300))
     password: Mapped[str] 
     age: Mapped[int | None]
     gender: Mapped[GenderEnum] = mapped_column(
@@ -37,9 +39,12 @@ class User(Base):
     )
     location: Mapped[str | None] = mapped_column(String(100))
 
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
+
     ratings: Mapped[List["Rating"]] = relationship(back_populates="user")
     tolisten: Mapped[List["ToListen"]] = relationship(back_populates="user")
-
+    actions: Mapped[List["Action"]] = relationship(back_populates="user")
 
     @reconstructor
     def init_on_load(self):
@@ -56,7 +61,6 @@ class User(Base):
         CheckConstraint("LENGTH(location) > 1", name="ck_user_location_length")
     )
 
-    #validators
     @validates('email')
     def validate_email(self, key, address):
         if '@' not in address:
@@ -104,7 +108,6 @@ class User(Base):
                 self.errors.append(f"{gender} is not a viable gender option")
         return gender
     
-    #get methods/select queries
     @classmethod
     def get_user_by_email(cls, email: str):
         stmt = select(cls).where(cls.email==email)
@@ -123,7 +126,6 @@ class User(Base):
         result = db.session.scalars(stmt).all()
         return result
 
-    #useful methods
     def save(self):
         db.session.add(self)
         db.session.commit()
@@ -133,6 +135,7 @@ class User(Base):
             "email" : self.email,
             "id" : self.id,
             "name" : self.name,
+            "bio": self.bio,
             "age" : self.age,
             "gender": self.gender,
             "location": self.location
@@ -144,7 +147,7 @@ class User(Base):
         hash_digest = hash_object.hexdigest()
         return hash_digest
     
-    #register/login and such logic
+
     @classmethod
     def register(cls, data):
         if User.get_user_by_email(data.get('email')) is not None:
@@ -185,6 +188,7 @@ class User(Base):
         new_age = data.get('age')
         new_gender = data.get('gender')
         new_location = data.get('location')
+        new_bio = data.get('bio')
 
         if new_name is not None:
             self.name = new_name
@@ -197,6 +201,9 @@ class User(Base):
         
         if new_location is not None:
             self.location = new_location
+
+        if new_bio is not None:
+                    self.bio = new_bio
 
         if len(self.errors) > 0:
             return False, {"error": self.errors, "code": 400}

@@ -1,9 +1,16 @@
+import enum
+import datetime
 from .base import Base
-from sqlalchemy.orm import Mapped, mapped_column, relationship, joinedload, validates
-from sqlalchemy import String, ForeignKey, select, UniqueConstraint, CheckConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship, joinedload, validates, selectinload
+from sqlalchemy import String, ForeignKey, select, UniqueConstraint, CheckConstraint, Enum, func, DateTime
 from typing import List, Optional
 from app.extensions import db
 from app.model import Album
+
+class ObjectType(enum.Enum):
+    SONG = "Song"
+    ALBUM = "Album"
+    ARTIST = "Artist"
 
 class ToListen(Base):
     __tablename__ = "tolisten"
@@ -13,16 +20,21 @@ class ToListen(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     album_id: Mapped[int] = mapped_column(ForeignKey("album.id"))
 
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now())
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(), default=func.now(), onupdate=func.now())
+
+    listened: Mapped[bool] = mapped_column(default=False)
+
     user: Mapped["User"] = relationship(back_populates="tolisten")
     album: Mapped["Album"] = relationship(back_populates="tolisten")
 
     __table_args__ = (
         UniqueConstraint('user_id', 'album_id', name="uq_tolisten_albumid_userid"),
     )
-    #can be optimized, load_only() for artist,album
+
     @classmethod
-    def get_all_tolisten_join_album_join_artist_by_user_id(cls,user_id): 
-        stmt = select(cls).where(cls.user_id== user_id).options(joinedload(cls.album).joinedload(Album.artist))
+    def get_all_join_album_join_artist_by_user_id(cls,user_id): 
+        stmt = select(cls).where(cls.user_id== user_id).options(joinedload(cls.album).joinedload(Album.artist), joinedload(cls.album).selectinload(Album.genres))
         result = db.session.scalars(stmt).all()
         return result
     
@@ -32,6 +44,22 @@ class ToListen(Base):
         result = db.session.scalar(stmt)
         return result
     
+    @classmethod
+    def exists_for_user(cls, user_id, album_id):
+        stmt = select(cls).filter_by(user_id=user_id, album_id=album_id)
+        return db.session.scalar(stmt) is not None
+    
+    @classmethod
+    def get_users_recent(cls, user_id):
+        stmt = select(ToListen).options(joinedload(cls.album).joinedload(Album.artist), joinedload(cls.album).selectinload(Album.genres)).where(ToListen.user_id==user_id).order_by(ToListen.created_at.desc()).limit(5)
+        result = db.session.scalars(stmt)
+        return result
+
+    @classmethod
+    def count_user_tolisten(cls, user_id):
+        stmt = select(func.count(ToListen.id)).where(ToListen.user_id==user_id)
+        return db.session.scalar(stmt)
+
     #you need to pass user_id before when creating a ToListen, so it works fine
     @validates('album_id')
     def validate_album_id(self, key, album_id):
@@ -57,3 +85,13 @@ class ToListen(Base):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "note": self.note,
+            "listened": self.listened,
+            "created_at": self.created_at,
+            "Album": self.album.to_dict()
+        }
