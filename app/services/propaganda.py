@@ -50,7 +50,6 @@ class PropagandaDranika:
     def build_user_genre_map(user_id: int) -> dict:
         from ..model.rating import Rating
         user_actions = Action.get_all_for_user(user_id)
-        babagaga = [act.to_dict() for act in user_actions]
         user_genre_map = defaultdict(int)
         excluded_album_ids = []
         for action in user_actions:
@@ -107,7 +106,7 @@ class PropagandaDranika:
                 for g in action_reference.album.genres:
                     user_genre_map[g.id] += weight
 
-        sorted_map = sorted(user_genre_map.items(), key=operator.itemgetter(1), reverse=True)[:5] #mb po inshomu
+        sorted_map = sorted(user_genre_map.items(), key=operator.itemgetter(1), reverse=True)[:5]
         return sorted_map, excluded_album_ids
         
     def select_canditates(user_genre_map: dict):
@@ -181,7 +180,6 @@ class PropagandaDranika:
         return final_recommendations
 
 
-#!!!!!!!! DOBAVIT SHOB VID ODNOGO ARTISTA NE BULO BILSHE N ALBUMS !!!!!!!!!!
 
 
 
