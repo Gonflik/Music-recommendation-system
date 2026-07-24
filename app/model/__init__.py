@@ -7,7 +7,6 @@ from .tolisten import ToListen
 from .user import User
 from .genre import Genre
 from .action import Action
-from .recommendation import Recommendation
 from .TokenBlocklist import TokenBlocklist
 from .associations.album_genre_association import album_genre_association
 from .associations.artist_song_association import artist_song_association

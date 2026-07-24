@@ -45,7 +45,6 @@ class User(Base):
     ratings: Mapped[List["Rating"]] = relationship(back_populates="user")
     tolisten: Mapped[List["ToListen"]] = relationship(back_populates="user")
     actions: Mapped[List["Action"]] = relationship(back_populates="user")
-    recommendations: Mapped[List["Recommendation"]] = relationship(back_populates="user")
 
     @reconstructor
     def init_on_load(self):

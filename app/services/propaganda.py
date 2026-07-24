@@ -3,7 +3,6 @@ from datetime import datetime
 from collections import defaultdict
 from app.model.action import Action
 from app.model.album import Album
-from app.model.recommendation import Recommendation
 from app.model.action import ActionName, ReferenceClassName
 from sqlalchemy import select
 from app.extensions import db
