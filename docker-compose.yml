@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      - app_network
+  db_test:
+    image: postgres:16
+    profiles: ["test"]  
+    environment:
+      POSTGRES_USER: testdranik
+      POSTGRES_PASSWORD: dranik322
+      POSTGRES_DB: for_pytest
+    ports:
+      - "5433:5432"
+    networks:
+      - app_network
+    #docker compose --profile test up -d db_test
+  redis:
+    image: redis:7-alpine
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  api:
+    build: .
+    container_name: flask_api
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
