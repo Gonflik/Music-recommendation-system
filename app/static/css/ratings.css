@@ -292,9 +292,9 @@ body {
 
 .rating-edit-modal {
   position: relative;
-  width: 600px;
+  width: 660px;
   max-width: calc(100% - 32px);
-  padding: 44px 48px;
+  padding: 44px 36px;
 }
 
 .rating-edit-modal-bg {
@@ -335,7 +335,7 @@ body {
 
 /* ── score row in modal ──────────────────────── */
 .rating-edit-score-row {
-  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  display: flex; gap: 6px; flex-wrap: nowrap; align-items: center;
 }
 
 .rating-edit-num-btn {
