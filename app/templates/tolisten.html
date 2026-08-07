@@ -31,7 +31,7 @@
         </nav>
       </div>
       <div class="nav-right">
-        <a href="{{ url_for('user.user_login') }}" class="nav-link">Log In</a>
+        <a href="{{ url_for('user.login_page') }}" class="nav-link">Log In</a>
         <a href="{{ url_for('user.register_page') }}" class="nav-link">Sign Up</a>
       </div>
       <button class="burger-btn" id="burgerBtn" aria-label="Open menu">
@@ -77,13 +77,13 @@
           <nav class="footer-links">
             <a href="{{ url_for('explore.explore_page') }}" class="footer-link gradient-text">Explore</a>
             <a href="{{ url_for('tolisten.tolisten_page') }}" class="footer-link gradient-text">ToListen</a>
-            <a href="{{ url_for('rating.rating_get_all') }}" class="footer-link gradient-text">Ratings</a>
+            <a href="{{ url_for('rating.rating_page') }}" class="footer-link gradient-text">Ratings</a>
           </nav>
         </div>
         <div class="footer-nav-group">
           <p class="footer-group-label">Account</p>
           <div class="footer-auth">
-            <a href="{{ url_for('user.user_login') }}" class="footer-link">Log In</a>
+            <a href="{{ url_for('user.login_page') }}" class="footer-link">Log In</a>
             <a href="{{ url_for('user.register_page') }}" class="footer-link">Sign Up</a>
           </div>
         </div>
@@ -116,12 +116,12 @@
       <div class="mobile-nav-links">
         <a href="{{ url_for('explore.explore_page') }}" class="mobile-nav-link gradient-text">Explore</a>
         <a href="{{ url_for('tolisten.tolisten_page') }}" class="mobile-nav-link gradient-text">ToListen</a>
-        <a href="{{ url_for('rating.rating_get_all') }}" class="mobile-nav-link gradient-text">Ratings</a>
+        <a href="{{ url_for('rating.rating_page') }}" class="mobile-nav-link gradient-text">Ratings</a>
       </div>
       <hr class="mobile-nav-divider">
       <p class="mobile-nav-label">Account</p>
       <div class="mobile-nav-auth">
-        <a href="{{ url_for('user.user_login') }}" class="mobile-nav-auth-link">Log In</a>
+        <a href="{{ url_for('user.login_page') }}" class="mobile-nav-auth-link">Log In</a>
         <a href="{{ url_for('user.register_page') }}" class="mobile-nav-auth-link">Sign Up</a>
       </div>
     </div>

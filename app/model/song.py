@@ -15,7 +15,7 @@ class Song(Base):
     
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     dzid: Mapped[int] = mapped_column(BigInteger, unique=True)
-    name: Mapped[str] = mapped_column(String(100))
+    name: Mapped[str] = mapped_column(String(500))
     length: Mapped[int]
     song_position: Mapped[int | None]
     picture: Mapped[str]

@@ -14,7 +14,7 @@ class Album(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     dzid: Mapped[int] = mapped_column(BigInteger, unique=True)
-    name: Mapped[str] = mapped_column(String(200))
+    name: Mapped[str] = mapped_column(String(500))
     length: Mapped[int | None]
     release_date: Mapped[datetime.date | None] = mapped_column(Date())
     release_type: Mapped[str | None]
