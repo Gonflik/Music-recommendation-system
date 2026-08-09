@@ -17,7 +17,6 @@ Live demo: (coming soon)
   from your listening history and ratings, then scores and ranks candidates
 - **Search** albums, artists, and songs powered by the Deezer API
 - **Public profiles** — view any user's ratings and activity
-- **Dark mode** on album pages (notebook flip UI)
 
 ---
 
@@ -86,4 +85,4 @@ coverage run -m pytest && coverage report
 
 - [Entity diagram](https://www.figma.com/board/N0pxGvjtGdsVxDgebz4rsX/Music-database?node-id=0-1)
 - [Sequence diagram](https://www.figma.com/board/uapBxZakk8wbqJZ62jd1eA/MRS-Sequence-diagram?node-id=0-1)
-- [Database schema](/MRS_schema.sql)
+- [Database schema](/sql_dump.sql)
