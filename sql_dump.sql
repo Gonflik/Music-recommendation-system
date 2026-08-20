@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict BgjFa5mFm5QW6HTNNKQA5N6B3FiShYA2tn0bWz8NWGK6Ob8SCrpX1UzUEzqRfh0
+\restrict hbgCwQQZ6a48qUK6lHfMhk9prZA0oRR3Uu71PK71AtI4CI4bkuGpULUPGW1EfsI
 
 -- Dumped from database version 16.13 (Debian 16.13-1.pgdg13+1)
 -- Dumped by pg_dump version 16.13 (Debian 16.13-1.pgdg13+1)
@@ -123,7 +123,7 @@ ALTER SEQUENCE public.action_id_seq OWNED BY public.action.id;
 CREATE TABLE public.album (
     id integer NOT NULL,
     dzid bigint NOT NULL,
-    name character varying(200) NOT NULL,
+    name character varying(500) NOT NULL,
     length integer,
     picture character varying NOT NULL,
     artist_id integer NOT NULL,
@@ -273,53 +273,6 @@ ALTER SEQUENCE public.genre_id_seq OWNED BY public.genre.id;
 
 
 --
--- Name: playlist; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.playlist (
-    id integer NOT NULL,
-    name character varying(120) NOT NULL,
-    description character varying(200) NOT NULL
-);
-
-
-ALTER TABLE public.playlist OWNER TO postgres;
-
---
--- Name: playlist_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.playlist_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.playlist_id_seq OWNER TO postgres;
-
---
--- Name: playlist_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.playlist_id_seq OWNED BY public.playlist.id;
-
-
---
--- Name: playlist_song_association; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.playlist_song_association (
-    playlist_id integer NOT NULL,
-    song_id integer NOT NULL
-);
-
-
-ALTER TABLE public.playlist_song_association OWNER TO postgres;
-
---
 -- Name: rating; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -367,7 +320,7 @@ ALTER SEQUENCE public.rating_id_seq OWNED BY public.rating.id;
 CREATE TABLE public.song (
     id integer NOT NULL,
     dzid bigint NOT NULL,
-    name character varying(100) NOT NULL,
+    name character varying(500) NOT NULL,
     length integer NOT NULL,
     song_position integer,
     picture character varying NOT NULL,
@@ -554,13 +507,6 @@ ALTER TABLE ONLY public.genre ALTER COLUMN id SET DEFAULT nextval('public.genre_
 
 
 --
--- Name: playlist id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.playlist ALTER COLUMN id SET DEFAULT nextval('public.playlist_id_seq'::regclass);
-
-
---
 -- Name: rating id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -697,8 +643,8 @@ COPY public.action (id, name, reference_name, reference_id, counter, user_id, cr
 139	ALBUM_SHOW	ALBUM	731	1	2	2026-07-14 11:33:53.441211	2026-07-14 11:33:53.441211
 32	ALBUM_SHOW	ALBUM	388	3	4	2026-06-25 12:30:11.90553	2026-07-15 08:23:10.140642
 142	ALBUM_SHOW	ALBUM	151	20	2	2026-07-15 08:21:48.460674	2026-07-18 11:10:34.277272
-129	ALBUM_SHOW	ALBUM	190	21	3	2026-07-12 09:26:41.995051	2026-07-29 08:42:50.939159
 141	ALBUM_SHOW	ALBUM	186	3	2	2026-07-14 11:39:28.27395	2026-07-18 11:10:29.269762
+129	ALBUM_SHOW	ALBUM	190	22	3	2026-07-12 09:26:41.995051	2026-08-07 12:23:37.74669
 132	ALBUM_SHOW	ALBUM	163	2	3	2026-07-13 10:20:24.556658	2026-07-19 10:23:37.798986
 54	ALBUM_SHOW	ALBUM	251	5	3	2026-07-09 11:23:11.40395	2026-07-19 10:24:02.512358
 143	ALBUM_SHOW	ALBUM	163	14	2	2026-07-17 10:16:51.373998	2026-07-18 10:38:35.090503
@@ -723,6 +669,10 @@ COPY public.action (id, name, reference_name, reference_id, counter, user_id, cr
 221	ARTIST_SHOW	ARTIST	186	5	7	2026-07-19 13:33:38.962089	2026-07-24 14:04:26.836712
 179	ALBUM_SHOW	ALBUM	229	2	3	2026-07-18 12:01:25.983995	2026-07-24 14:44:19.003097
 259	ARTIST_SHOW	ARTIST	260	3	3	2026-07-24 15:07:57.86132	2026-07-24 15:08:01.57685
+260	RATE_SONG	SONG	1086	1	3	2026-08-07 12:24:38.782749	2026-08-07 12:24:38.782749
+261	ADD_TO_LISTEN	ALBUM	190	1	3	2026-08-07 12:25:32.872036	2026-08-07 12:25:32.872036
+262	ARTIST_SHOW	ARTIST	447	2	3	2026-08-07 12:26:51.427296	2026-08-07 12:27:26.283869
+263	ALBUM_SHOW	ALBUM	814	1	3	2026-08-07 12:28:15.985418	2026-08-07 12:28:15.985418
 \.
 
 
@@ -1356,6 +1306,28 @@ COPY public.album (id, dzid, name, length, picture, artist_id, ghost_songs_count
 798	573610191	I Just Want To Dance	149	https://cdn-images.dzcdn.net/images/cover/df01892eba28751796d3e2c7c47b23ef/1000x1000-000000-80-0-0.jpg	442	1	2024-04-19	single	2026-07-24 14:42:40.322153	2026-07-24 14:42:40.322153
 799	920188311	The Hunt	521	https://cdn-images.dzcdn.net/images/cover/2ff1d0421f771b90836cfc39ce572199/1000x1000-000000-80-0-0.jpg	436	4	2026-02-27	ep	2026-07-24 14:42:40.322153	2026-07-24 14:42:40.322153
 800	574225461	The Rusty Trombone	173	https://cdn-images.dzcdn.net/images/cover/41553bddfb682262958b23f00cbdffea/1000x1000-000000-80-0-0.jpg	443	1	2024-05-17	single	2026-07-24 14:42:42.055445	2026-07-24 14:42:42.055445
+801	425754977	Bach (Mandragora & Devochka Remix)	339	https://cdn-images.dzcdn.net/images/cover/051e6cc55ed73d5bfcc73a4aeb92114b/1000x1000-000000-80-0-0.jpg	449	1	2023-04-04	single	2026-08-07 12:26:39.190242	2026-08-07 12:26:39.190242
+802	319173587	La Bachata	162	https://cdn-images.dzcdn.net/images/cover/88390e8360f6f28138ab200efd1f9a6f/1000x1000-000000-80-0-0.jpg	450	1	2022-05-26	single	2026-08-07 12:26:39.190242	2026-08-07 12:26:39.190242
+803	123805302	Le professionnel (Bande originale du film)	3024	https://cdn-images.dzcdn.net/images/cover/bfcf260f3ca1eaea676a1f9f83927798/1000x1000-000000-80-0-0.jpg	451	25	1981-01-01	album	2026-08-07 12:26:39.190242	2026-08-07 12:26:39.190242
+804	7020970	Bach	415	https://cdn-images.dzcdn.net/images/cover/aef04736b26bcc467800566619626655/1000x1000-000000-80-0-0.jpg	449	1	2013-10-24	single	2026-08-07 12:26:39.190242	2026-08-07 12:26:39.190242
+805	1025522582	J.S. Bach: Air on the G String (Arr. Ólafsson for Piano from Orchestral Suite No. 3, BWV 1068)	\N	https://cdn-images.dzcdn.net/images/cover/cd9b42b2e7325fb63765b6748041767a/1000x1000-000000-80-0-0.jpg	447	\N	\N	\N	2026-08-07 12:26:52.032888	2026-08-07 12:26:52.032888
+806	6585265	Bach, J.S.: Toccata and Fugue BWV 565; Organ Works BWV 572, 590, 532, 769 & 552	\N	https://cdn-images.dzcdn.net/images/cover/d16d40d8ebd347650af0c6e8627dfc99/1000x1000-000000-80-0-0.jpg	447	\N	\N	\N	2026-08-07 12:26:52.032888	2026-08-07 12:26:52.032888
+807	71059322	Bach, J.S.: Sonata for Violin Solo No. 1 in G Minor, BWV 1001: 4. Presto	\N	https://cdn-images.dzcdn.net/images/cover/fbe0266937ade7b5610dfca4c98333b3/1000x1000-000000-80-0-0.jpg	447	\N	\N	\N	2026-08-07 12:26:52.032888	2026-08-07 12:26:52.032888
+808	6472252	Bach, J.S.: Orchestral Works	\N	https://cdn-images.dzcdn.net/images/cover/9224b78e7f1a364c7ae5758c522ffd62/1000x1000-000000-80-0-0.jpg	447	\N	\N	\N	2026-08-07 12:26:52.032888	2026-08-07 12:26:52.032888
+809	14283988	Bach	\N	https://cdn-images.dzcdn.net/images/cover/f2d02f45d84fccc0073da00698ccfeb3/1000x1000-000000-80-0-0.jpg	447	\N	\N	\N	2026-08-07 12:26:52.032888	2026-08-07 12:26:52.032888
+810	91549082	Bach, JS: Violin Sonatas, BWV 1016 - 1019	3841	https://cdn-images.dzcdn.net/images/cover/e8d282ccf7ef470d5aec53f806843e25/1000x1000-000000-80-0-0.jpg	453	17	2019-03-27	album	2026-08-07 12:27:45.668934	2026-08-07 12:27:45.668934
+811	1334743	Bach By Menuhin - Volume 1	2720	https://cdn-images.dzcdn.net/images/cover/bf38372e8557860687203f225d84ef78/1000x1000-000000-80-0-0.jpg	454	12	2006-01-10	album	2026-08-07 12:27:45.668934	2026-08-07 12:27:45.668934
+812	613304832	Bach	3838	https://cdn-images.dzcdn.net/images/cover/ed497dcdf68b15c0542e492cb2d4ac1e/1000x1000-000000-80-0-0.jpg	455	25	2024-10-18	album	2026-08-07 12:27:45.668934	2026-08-07 12:27:45.668934
+813	72168922	Johann Sebastian Bach	2800	https://cdn-images.dzcdn.net/images/cover/e1cb539536a6916a3a45d0151a4b1d92/1000x1000-000000-80-0-0.jpg	456	35	2018-09-07	album	2026-08-07 12:27:45.668934	2026-08-07 12:27:45.668934
+814	140425062	Moonlight Sonata	331	https://cdn-images.dzcdn.net/images/cover/a5581fca84c28ea419efc8b6cb788172/1000x1000-000000-80-0-0.jpg	462	1	2020-04-03	single	2026-08-07 12:27:51.185369	2026-08-07 12:27:51.185369
+815	150221892	Bethoven Masterpieces and Friends	7781	https://cdn-images.dzcdn.net/images/cover/b523e17e7991aff979b47d2d9f675310/1000x1000-000000-80-0-0.jpg	463	38	2020-05-19	album	2026-08-07 12:27:51.185369	2026-08-07 12:27:51.185369
+816	7029476	Moonlight Sonata	4215	https://cdn-images.dzcdn.net/images/cover/c6b54ae7af4992902349d909da34c0e2/1000x1000-000000-80-0-0.jpg	457	32	2013-10-08	album	2026-08-07 12:27:51.185369	2026-08-07 12:27:51.185369
+817	366747127	Chaos Magic	1316	https://cdn-images.dzcdn.net/images/cover/8c98651f639be65ab35f5bf2fb3b8cca/1000x1000-000000-80-0-0.jpg	464	5	2022-10-16	ep	2026-08-07 12:27:51.185369	2026-08-07 12:27:51.185369
+818	7064224	Bach Sonatas	4443	https://cdn-images.dzcdn.net/images/cover/1f436ddafde0d80a4187884bb38dcb24/1000x1000-000000-80-0-0.jpg	465	21	2009-10-02	album	2026-08-07 12:39:34.041421	2026-08-07 12:39:34.041421
+819	123007642	Bach Sonatas and Partitas: 2017 Session	1699	https://cdn-images.dzcdn.net/images/cover/8cd151540a75c0d76b4048e3b73e8f20/1000x1000-000000-80-0-0.jpg	466	8	2018-09-22	album	2026-08-07 12:39:34.041421	2026-08-07 12:39:34.041421
+820	14713386	Bach Sonatas BWV 1014-1019	6463	https://cdn-images.dzcdn.net/images/cover/fd8e8e3affa06d0f4f247d612b811533/1000x1000-000000-80-0-0.jpg	467	25	2016-12-02	album	2026-08-07 12:39:34.041421	2026-08-07 12:39:34.041421
+821	839391242	Bach Sonatas for Viola da Gamba and Obbligato Harpsichord	3129	https://cdn-images.dzcdn.net/images/cover/48877d75d1943f18d8ed25037206bd4f/1000x1000-000000-80-0-0.jpg	468	13	2025-11-21	album	2026-08-07 12:39:34.041421	2026-08-07 12:39:34.041421
+822	74439372	Hilary Hahn plays J.S. Bach: Violin Sonatas Nos. 1 & 2; Partita No. 1	4541	https://cdn-images.dzcdn.net/images/cover/fbe0266937ade7b5610dfca4c98333b3/1000x1000-000000-80-0-0.jpg	469	16	2018-10-05	album	2026-08-07 12:39:34.041421	2026-08-07 12:39:34.041421
 \.
 
 
@@ -2182,6 +2154,26 @@ COPY public.album_genre_association (album_id, genre_id) FROM stdin;
 800	26
 800	2
 800	3
+801	12
+801	26
+802	1
+802	22
+802	29
+804	26
+810	36
+811	36
+812	36
+813	36
+814	36
+815	8
+816	22
+817	12
+817	26
+818	36
+819	36
+820	36
+821	36
+822	36
 \.
 
 
@@ -2190,7 +2182,7 @@ COPY public.album_genre_association (album_id, genre_id) FROM stdin;
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-3192197a8572
+c32c718afe5b
 \.
 
 
@@ -2268,9 +2260,35 @@ COPY public.artist (id, dzid, name, picture, ghost_albums_count, created_at, upd
 393	215272595	ZzzSleepyAsh	https://api.deezer.com/artist/215272595/image	40	2026-07-11 15:28:01.99784	2026-07-11 15:28:01.99784
 394	76715642	Slashin	https://api.deezer.com/artist/76715642/image	17	2026-07-11 15:28:01.99784	2026-07-11 15:28:01.99784
 426	137967232	Arut	https://api.deezer.com/artist/137967232/image	15	2026-07-14 11:32:54.158405	2026-07-14 11:32:54.158405
+444	13618153	Bach	https://api.deezer.com/artist/13618153/image	7	2026-08-07 12:26:37.78666	2026-08-07 12:26:37.78666
+445	377397211	BACH.	https://api.deezer.com/artist/377397211/image	27	2026-08-07 12:26:37.78666	2026-08-07 12:26:37.78666
+446	57213	Bach & Laverne	https://api.deezer.com/artist/57213/image	1	2026-08-07 12:26:37.78666	2026-08-07 12:26:37.78666
+447	1900	Johann Sebastian Bach	https://api.deezer.com/artist/1900/image	469	2026-08-07 12:26:37.78666	2026-08-07 12:26:37.78666
+448	74397	Nach	https://api.deezer.com/artist/74397/image	20	2026-08-07 12:26:37.78666	2026-08-07 12:26:37.78666
+449	1887541	4i20	https://api.deezer.com/artist/1887541/image	42	2026-08-07 12:26:38.158988	2026-08-07 12:26:38.158988
+450	11559031	Manuel Turizo	https://api.deezer.com/artist/11559031/image	100	2026-08-07 12:26:38.158988	2026-08-07 12:26:38.158988
+451	1536	Ennio Morricone	https://api.deezer.com/artist/1536/image	287	2026-08-07 12:26:38.158988	2026-08-07 12:26:38.158988
+452	128227902	Bath Sonata	https://api.deezer.com/artist/128227902/image	3	2026-08-07 12:27:43.94808	2026-08-07 12:27:43.94808
+453	409258	Renaud Capuçon	https://api.deezer.com/artist/409258/image	86	2026-08-07 12:27:44.242952	2026-08-07 12:27:44.242952
+454	1473410	Menuhin	https://api.deezer.com/artist/1473410/image	1	2026-08-07 12:27:44.242952	2026-08-07 12:27:44.242952
+455	153702	Alexandre Tharaud	https://api.deezer.com/artist/153702/image	103	2026-08-07 12:27:44.242952	2026-08-07 12:27:44.242952
+456	1324555	Víkingur Ólafsson	https://api.deezer.com/artist/1324555/image	54	2026-08-07 12:27:44.242952	2026-08-07 12:27:44.242952
+457	5275401	Moonlight Sonata	https://api.deezer.com/artist/5275401/image	121	2026-08-07 12:27:49.890624	2026-08-07 12:27:49.890624
+458	1872881	Moonlight Sonata , Mondschein Sonate (L. V. Beethoven)	https://api.deezer.com/artist/1872881/image	2	2026-08-07 12:27:49.890624	2026-08-07 12:27:49.890624
+459	230065185	Moonlight Sonata	https://api.deezer.com/artist/230065185/image	1	2026-08-07 12:27:49.890624	2026-08-07 12:27:49.890624
+460	4395935	Moonlight Sonata , Mondscheinsonate [ Beethoven ]	https://api.deezer.com/artist/4395935/image	1	2026-08-07 12:27:49.890624	2026-08-07 12:27:49.890624
+461	5253607	Moonlight Sonata Moods	https://api.deezer.com/artist/5253607/image	1	2026-08-07 12:27:49.890624	2026-08-07 12:27:49.890624
+462	6144	Ludwig van Beethoven	https://api.deezer.com/artist/6144/image	477	2026-08-07 12:27:50.0401	2026-08-07 12:27:50.0401
+463	244336762	Junior dos Santos Silva	https://api.deezer.com/artist/244336762/image	4	2026-08-07 12:27:50.0401	2026-08-07 12:27:50.0401
+464	5987322	meganeko	https://api.deezer.com/artist/5987322/image	26	2026-08-07 12:27:50.0401	2026-08-07 12:27:50.0401
 427	81707552	Nevis	https://api.deezer.com/artist/81707552/image	10	2026-07-14 11:33:14.470904	2026-07-14 11:33:14.470904
 428	60761882	01099	https://api.deezer.com/artist/60761882/image	63	2026-07-14 11:33:14.470904	2026-07-14 11:33:14.470904
 429	15727	Element Of Crime	https://api.deezer.com/artist/15727/image	31	2026-07-14 11:33:14.470904	2026-07-14 11:33:14.470904
+465	70673	James Galway	https://api.deezer.com/artist/70673/image	112	2026-08-07 12:39:32.66612	2026-08-07 12:39:32.66612
+466	1157575	Derek Gripper	https://api.deezer.com/artist/1157575/image	30	2026-08-07 12:39:32.66612	2026-08-07 12:39:32.66612
+467	70297	David Oistrakh	https://api.deezer.com/artist/70297/image	417	2026-08-07 12:39:32.66612	2026-08-07 12:39:32.66612
+468	1636662	Margaret Little	https://api.deezer.com/artist/1636662/image	8	2026-08-07 12:39:32.66612	2026-08-07 12:39:32.66612
+469	70067	Hilary Hahn	https://api.deezer.com/artist/70067/image	48	2026-08-07 12:39:32.66612	2026-08-07 12:39:32.66612
 293	304870	Abbey Road Ensemble	https://cdn-images.dzcdn.net/images/artist/afae92db62467dca3b9351dde1546e93/1000x1000-000000-80-0-0.jpg	1	2026-07-08 10:38:08.047226	2026-07-09 12:19:15.990432
 294	1582485	Abbey Road Xmas Ensemble	https://cdn-images.dzcdn.net/images/artist/82cb29162eaba6c0a6329f6de9ac8b71/1000x1000-000000-80-0-0.jpg	1	2026-07-08 10:38:08.047226	2026-07-09 12:19:15.990432
 295	1192449	Abbey Road's Philharmonic Orchestra	https://cdn-images.dzcdn.net/images/artist/5cda1f6327cc4bb6a388ed98700982fa/1000x1000-000000-80-0-0.jpg	1	2026-07-08 10:38:08.047226	2026-07-09 12:19:15.990432
@@ -3747,6 +3765,21 @@ COPY public.artist_song_association (artist_id, song_id) FROM stdin;
 186	1227
 186	1228
 186	1229
+449	1259
+450	1260
+451	1261
+451	1262
+449	1263
+462	1272
+463	1273
+457	1274
+463	1275
+464	1276
+453	1281
+454	1282
+454	1283
+455	1284
+456	1285
 \.
 
 
@@ -3788,22 +3821,6 @@ COPY public.genre (id, dzid, name, created_at, updated_at) FROM stdin;
 
 
 --
--- Data for Name: playlist; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.playlist (id, name, description) FROM stdin;
-\.
-
-
---
--- Data for Name: playlist_song_association; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.playlist_song_association (playlist_id, song_id) FROM stdin;
-\.
-
-
---
 -- Data for Name: rating; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -3830,6 +3847,7 @@ COPY public.rating (id, score, description, album_id, song_id, user_id, created_
 27	5	5 centimeters per second	\N	231	2	2026-07-18 10:53:15.265406	2026-07-18 10:53:15.265406
 28	5	5 centimeters per second	\N	469	2	2026-07-18 10:53:17.88012	2026-07-18 10:53:17.88012
 30	5	5 centimeters per second	\N	1089	7	2026-07-19 13:32:48.578855	2026-07-19 13:32:48.578855
+31	4	5 centimeters per second	\N	1086	3	2026-08-07 12:24:38.760255	2026-08-07 12:24:38.760255
 \.
 
 
@@ -4935,6 +4953,21 @@ COPY public.song (id, dzid, name, length, song_position, picture, preview, album
 1227	34991491	Straight To Video (Clean Version)	224	\N	https://cdn-images.dzcdn.net/images/cover/a59fadeda468b0c58e1179cc728f98c5/1000x1000-000000-80-0-0.jpg	\N	560	2026-07-29 08:43:28.503723	2026-07-29 08:43:28.503723
 1228	34991541	2 H******s And An 8 B*** (Clean Version)	137	\N	https://cdn-images.dzcdn.net/images/cover/a59fadeda468b0c58e1179cc728f98c5/1000x1000-000000-80-0-0.jpg	\N	560	2026-07-29 08:43:28.503723	2026-07-29 08:43:28.503723
 1229	34991501	Tom Sawyer (Clean Version)	144	\N	https://cdn-images.dzcdn.net/images/cover/a59fadeda468b0c58e1179cc728f98c5/1000x1000-000000-80-0-0.jpg	\N	560	2026-07-29 08:43:28.503723	2026-07-29 08:43:28.503723
+1259	2223211057	Bach (Mandragora & Devochka Remix)	339	\N	https://cdn-images.dzcdn.net/images/cover/051e6cc55ed73d5bfcc73a4aeb92114b/1000x1000-000000-80-0-0.jpg	\N	801	2026-08-07 12:26:39.208958	2026-08-07 12:26:39.208958
+1260	1753549417	La Bachata	162	\N	https://cdn-images.dzcdn.net/images/cover/88390e8360f6f28138ab200efd1f9a6f/1000x1000-000000-80-0-0.jpg	\N	802	2026-08-07 12:26:39.208958	2026-08-07 12:26:39.208958
+1261	836537162	Bach (Première variation)	81	\N	https://cdn-images.dzcdn.net/images/cover/bfcf260f3ca1eaea676a1f9f83927798/1000x1000-000000-80-0-0.jpg	\N	803	2026-08-07 12:26:39.208958	2026-08-07 12:26:39.208958
+1262	836537262	Bach (Deuxième variation)	90	\N	https://cdn-images.dzcdn.net/images/cover/bfcf260f3ca1eaea676a1f9f83927798/1000x1000-000000-80-0-0.jpg	\N	803	2026-08-07 12:26:39.208958	2026-08-07 12:26:39.208958
+1263	71481358	Bach (Original Mix)	415	\N	https://cdn-images.dzcdn.net/images/cover/aef04736b26bcc467800566619626655/1000x1000-000000-80-0-0.jpg	\N	804	2026-08-07 12:26:39.208958	2026-08-07 12:26:39.208958
+1272	923175682	Moonlight Sonata	331	\N	https://cdn-images.dzcdn.net/images/cover/a5581fca84c28ea419efc8b6cb788172/1000x1000-000000-80-0-0.jpg	\N	814	2026-08-07 12:27:51.207031	2026-08-07 12:27:51.207031
+1273	969717102	Moonlight Sonata (First Movement)	302	\N	https://cdn-images.dzcdn.net/images/cover/b523e17e7991aff979b47d2d9f675310/1000x1000-000000-80-0-0.jpg	\N	815	2026-08-07 12:27:51.207031	2026-08-07 12:27:51.207031
+1274	71548227	Moonlight Sonata	447	\N	https://cdn-images.dzcdn.net/images/cover/c6b54ae7af4992902349d909da34c0e2/1000x1000-000000-80-0-0.jpg	\N	816	2026-08-07 12:27:51.207031	2026-08-07 12:27:51.207031
+1275	969717122	Moonlight Sonata (Third Movement)	411	\N	https://cdn-images.dzcdn.net/images/cover/b523e17e7991aff979b47d2d9f675310/1000x1000-000000-80-0-0.jpg	\N	815	2026-08-07 12:27:51.207031	2026-08-07 12:27:51.207031
+1276	1966820247	Moonlight Sonata (3rd Movement)	364	\N	https://cdn-images.dzcdn.net/images/cover/8c98651f639be65ab35f5bf2fb3b8cca/1000x1000-000000-80-0-0.jpg	\N	817	2026-08-07 12:27:51.207031	2026-08-07 12:27:51.207031
+1281	654739482	Bach, JS: Violin Sonata No. 4 in C Minor, BWV 1017: I. Siciliano. Largo	234	\N	https://cdn-images.dzcdn.net/images/cover/e8d282ccf7ef470d5aec53f806843e25/1000x1000-000000-80-0-0.jpg	\N	810	2026-08-07 12:39:32.60196	2026-08-07 12:39:32.60196
+1282	14519841	Bach Sonata No 1 In G Minor - Siciliano	180	\N	https://cdn-images.dzcdn.net/images/cover/bf38372e8557860687203f225d84ef78/1000x1000-000000-80-0-0.jpg	\N	811	2026-08-07 12:39:32.60196	2026-08-07 12:39:32.60196
+1283	14519839	Bach Sonata No 1 In G Minor - Adagio	261	\N	https://cdn-images.dzcdn.net/images/cover/bf38372e8557860687203f225d84ef78/1000x1000-000000-80-0-0.jpg	\N	811	2026-08-07 12:39:32.60196	2026-08-07 12:39:32.60196
+1284	2883372982	Bach, JS: Flute Sonata in E-Flat Major, BWV 1031: II. Siciliano (Transcr. Tharaud for Piano)	186	\N	https://cdn-images.dzcdn.net/images/cover/ed497dcdf68b15c0542e492cb2d4ac1e/1000x1000-000000-80-0-0.jpg	\N	812	2026-08-07 12:39:32.60196	2026-08-07 12:39:32.60196
+1285	549264892	Organ Sonata No. 4, BWV 528 : J.S. Bach: Organ Sonata No. 4, BWV 528: II. Andante [Adagio] (Transcr. by August Stradal)	326	\N	https://cdn-images.dzcdn.net/images/cover/e1cb539536a6916a3a45d0151a4b1d92/1000x1000-000000-80-0-0.jpg	\N	813	2026-08-07 12:39:32.60196	2026-08-07 12:39:32.60196
 \.
 
 
@@ -4973,6 +5006,7 @@ COPY public.tolisten (id, note, user_id, album_id, created_at, updated_at, liste
 16	simgo	3	429	2026-07-11 15:24:17.039418	2026-07-28 19:49:26.09637	t
 14	cool shite 322	3	96	2026-07-11 15:23:04.814031	2026-07-28 19:49:26.784721	t
 13	Cause it fockin MSI, even though they are kinda freaky, and weird...	3	186	2026-07-11 15:21:59.320155	2026-07-28 19:49:30.345966	t
+24		3	190	2026-08-07 12:25:32.810135	2026-08-07 12:25:53.580137	t
 \.
 
 
@@ -4995,21 +5029,21 @@ COPY public."user" (id, name, email, role, password, age, gender, location, crea
 -- Name: action_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.action_id_seq', 259, true);
+SELECT pg_catalog.setval('public.action_id_seq', 263, true);
 
 
 --
 -- Name: album_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.album_id_seq', 800, true);
+SELECT pg_catalog.setval('public.album_id_seq', 822, true);
 
 
 --
 -- Name: artist_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.artist_id_seq', 443, true);
+SELECT pg_catalog.setval('public.artist_id_seq', 469, true);
 
 
 --
@@ -5020,24 +5054,17 @@ SELECT pg_catalog.setval('public.genre_id_seq', 39, true);
 
 
 --
--- Name: playlist_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.playlist_id_seq', 1, false);
-
-
---
 -- Name: rating_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.rating_id_seq', 30, true);
+SELECT pg_catalog.setval('public.rating_id_seq', 31, true);
 
 
 --
 -- Name: song_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.song_id_seq', 1258, true);
+SELECT pg_catalog.setval('public.song_id_seq', 1285, true);
 
 
 --
@@ -5051,7 +5078,7 @@ SELECT pg_catalog.setval('public.tokenblocklist_id_seq', 1, false);
 -- Name: tolisten_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.tolisten_id_seq', 23, true);
+SELECT pg_catalog.setval('public.tolisten_id_seq', 24, true);
 
 
 --
@@ -5131,22 +5158,6 @@ ALTER TABLE ONLY public.genre
 
 ALTER TABLE ONLY public.genre
     ADD CONSTRAINT genre_pkey PRIMARY KEY (id);
-
-
---
--- Name: playlist playlist_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.playlist
-    ADD CONSTRAINT playlist_pkey PRIMARY KEY (id);
-
-
---
--- Name: playlist_song_association playlist_song_association_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.playlist_song_association
-    ADD CONSTRAINT playlist_song_association_pkey PRIMARY KEY (playlist_id, song_id);
 
 
 --
@@ -5293,22 +5304,6 @@ ALTER TABLE ONLY public.artist_song_association
 
 
 --
--- Name: playlist_song_association playlist_song_association_playlist_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.playlist_song_association
-    ADD CONSTRAINT playlist_song_association_playlist_id_fkey FOREIGN KEY (playlist_id) REFERENCES public.playlist(id);
-
-
---
--- Name: playlist_song_association playlist_song_association_song_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.playlist_song_association
-    ADD CONSTRAINT playlist_song_association_song_id_fkey FOREIGN KEY (song_id) REFERENCES public.song(id);
-
-
---
 -- Name: rating rating_album_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -5360,5 +5355,5 @@ ALTER TABLE ONLY public.tolisten
 -- PostgreSQL database dump complete
 --
 
-\unrestrict BgjFa5mFm5QW6HTNNKQA5N6B3FiShYA2tn0bWz8NWGK6Ob8SCrpX1UzUEzqRfh0
+\unrestrict hbgCwQQZ6a48qUK6lHfMhk9prZA0oRR3Uu71PK71AtI4CI4bkuGpULUPGW1EfsI
 
