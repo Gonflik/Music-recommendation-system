@@ -117,9 +117,9 @@ class DEEZNUTSAPI:
                 "length": album.duration if not safe_limit else None,
                 "picture": album.cover_xl,
                 "genres": genres,
-                "ghost_songs_count": album.nb_tracks,
-                "release_date": album.release_date,
-                "release_type": album.record_type,
+                "ghost_songs_count": album.nb_tracks if not safe_limit else None,
+                "release_date": album.release_date if not safe_limit else None,
+                "release_type": album.record_type if not safe_limit else None,
                 "artist_name": album.artist.name,
                 "artist_dzid": album.artist.id,
             })
