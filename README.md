@@ -5,7 +5,20 @@
 A full-stack music rating and recommendation web app. Rate albums and songs,
 build a ToListen list, and get personalized recommendations based on your taste.
 
-Live demo: (coming soon)
+## Live Demo
+
+**url:** https://music-recommendation-system-dqn4.onrender.com
+
+> **Demo note:** This demo is hosted on Render's free tier. If the app has been inactive for a while, Render may spin the service down, so the first request can take up to around a minute while it starts back up. The Neon PostgreSQL database may also briefly wake from inactivity.
+>
+> Some music-related requests may take longer on their first load because data is fetched from the Deezer API and cached in Redis. Deezer also has API rate limits, so some music features may occasionally be unavailable if the limit is reached.
+
+**Demo account:**
+
+```text
+Email: demo@gmail.com
+Password: demopassword
+```
 
 ---
 
