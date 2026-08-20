@@ -64,7 +64,7 @@ async function registerUser(e) {
     name: document.getElementById("name").value,
     email: document.getElementById("email").value,
     password: document.getElementById("password").value,
-    age: document.getElementById("age").value || null,
+    age: Number(document.getElementById("age").value) || null,
     gender: document.getElementById("gender").value,
     location: document.getElementById("location").value || null
   };
