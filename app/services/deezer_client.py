@@ -57,7 +57,7 @@ class DEEZNUTSAPI:
         with deezer.Client() as client:
             artist = client.get_artist(artist_dzid)
             albums = artist.get_albums()
-            result_albums, result_artists = DEEZNUTSAPI._format_album_with_its_artist(album_data=albums)
+            result_albums, result_artists = DEEZNUTSAPI._format_album_with_its_artist(album_data=albums, skip_genres=True)
             return result_albums, result_artists
 
     "----------------------------------------------------------------------------------------------------------------------------"
@@ -100,15 +100,16 @@ class DEEZNUTSAPI:
         
         return formatted_songs, formatted_albums, formatted_artists
 
-    def _format_album_with_its_artist(album_data):
+    def _format_album_with_its_artist(album_data, skip_genres: bool = False):
         formatted_albums = []
         for album in album_data:
             genres = []
-            for genre in album.genres:
-                genres.append({
-                    "name": genre.name,
-                    "dzid": genre.id
-                })
+            if not skip_genres:
+                for genre in album.genres:
+                    genres.append({
+                        "name": genre.name,
+                        "dzid": genre.id
+                    })
 
             formatted_albums.append({
                 "name": album.title,
